@@ -2,7 +2,11 @@ package service;
 
 import jakarta.ws.rs.core.Application;
 
-@jakarta.ws.rs.ApplicationPath("webresources")
+/**
+ * Configuración de la aplicación REST
+ * Base path: /rest/api/v1
+ */
+@jakarta.ws.rs.ApplicationPath("rest/api/v1")
 public class RESTapp extends Application {
     
 }
