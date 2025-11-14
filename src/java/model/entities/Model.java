@@ -7,95 +7,159 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
-/**
- * Entidad que representa un modelo de lenguaje (LLM)
- * 
- * TODO PERSONA A: Completar esta entidad con los siguientes campos:
- * - name (String, obligatorio)
- * - provider (String, obligatorio)
- * - summary (String, resumen corto 20-30 palabras)
- * - description (String, descripción larga)
- * - capabilities (List<String>, usar @ElementCollection)
- * - license (String)
- * - maxContextTokens (Integer)
- * - inputTypes (List<String>, usar @ElementCollection)
- * - outputTypes (List<String>, usar @ElementCollection)
- * - isPrivate (boolean)
- * - logoUrl (String)
- * - lastVersion (String)
- * - trainingDate (Date, usar @Temporal)
- * - lastUpdateDate (Date, usar @Temporal)
- * - versions (List<String>, opcional)
- * 
- * HINT: Mirar Topic.java y Comment.java como ejemplo
- */
 @Entity
 @XmlRootElement
 @NamedQueries({
-    // TODO PERSONA A: Añadir NamedQuery "Model.findAll" que devuelva todos los modelos ordenados por name
-    // TODO PERSONA A: Añadir NamedQuery "Model.findByProvider" que filtre por provider (case-insensitive)
+    @NamedQuery(name = "Model.findAll", query = "SELECT m FROM Model m ORDER BY m.name")
 })
 public class Model implements Serializable {
     private static final long serialVersionUID = 1L;
     
-    // TODO PERSONA A: Añadir campo id con anotaciones @Id, @SequenceGenerator y @GeneratedValue
-    // Usar el patrón: @SequenceGenerator(name="Model_Gen", allocationSize=1)
+    @Id
+    @SequenceGenerator(name = "Model_Gen", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Model_Gen")
+    private Long id;
     
-    // TODO PERSONA A: Añadir campo name (String, NOT NULL)
+    @NotNull
+    private String name;
     
-    // TODO PERSONA A: Añadir campo provider (String, NOT NULL)
+    @NotNull
+    private String provider;
     
-    // TODO PERSONA A: Añadir campo summary (String, max 500 caracteres)
+    private String summary;
+    private String description;
+    private String license;
+    private Integer maxContextTokens;
+    private boolean isPrivate;
+    private String logoUrl;
+    private String lastVersion;
     
-    // TODO PERSONA A: Añadir campo description (String, max 2000 caracteres)
+    @Temporal(TemporalType.DATE)
+    private Date trainingDate;
     
-    // TODO PERSONA A: Añadir campo capabilities (List<String>)
-    // Usar @ElementCollection(fetch = FetchType.EAGER)
-    // Usar @CollectionTable(name = "model_capabilities")
-    
-    // TODO PERSONA A: Añadir campo license (String)
-    
-    // TODO PERSONA A: Añadir campo maxContextTokens (Integer)
-    
-    // TODO PERSONA A: Añadir campo inputTypes (List<String>)
-    
-    // TODO PERSONA A: Añadir campo outputTypes (List<String>)
-    
-    // TODO PERSONA A: Añadir campo isPrivate (boolean, default false)
-    
-    // TODO PERSONA A: Añadir campo logoUrl (String)
-    
-    // TODO PERSONA A: Añadir campo lastVersion (String)
-    
-    // TODO PERSONA A: Añadir campo trainingDate (Date)
-    // Usar @Temporal(TemporalType.DATE)
-    
-    // TODO PERSONA A: Añadir campo lastUpdateDate (Date)
-    
-    // TODO PERSONA A: Añadir campo versions (List<String>, opcional)
+    @Temporal(TemporalType.DATE)
+    private Date lastUpdateDate;
 
-    // TODO PERSONA A: Crear constructor vacío
-    // Inicializar las listas (capabilities, inputTypes, outputTypes, versions) como ArrayList vacíos
+    public Model() {
+    }
 
-    // TODO PERSONA A: Crear getters y setters para TODOS los campos
-    // Tip: En NetBeans: Clic derecho → Insert Code → Getter and Setter
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
+    public Integer getMaxContextTokens() {
+        return maxContextTokens;
+    }
+
+    public void setMaxContextTokens(Integer maxContextTokens) {
+        this.maxContextTokens = maxContextTokens;
+    }
+
+    public boolean isIsPrivate() {
+        return isPrivate;
+    }
+
+    public void setIsPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getLastVersion() {
+        return lastVersion;
+    }
+
+    public void setLastVersion(String lastVersion) {
+        this.lastVersion = lastVersion;
+    }
+
+    public Date getTrainingDate() {
+        return trainingDate;
+    }
+
+    public void setTrainingDate(Date trainingDate) {
+        this.trainingDate = trainingDate;
+    }
+
+    public Date getLastUpdateDate() {
+        return lastUpdateDate;
+    }
+
+    public void setLastUpdateDate(Date lastUpdateDate) {
+        this.lastUpdateDate = lastUpdateDate;
+    }
 
     @Override
     public int hashCode() {
-        // TODO PERSONA A: Implementar hashCode basado en el id
-        return 0;
+        int hash = 0;
+        hash += (id != null ? id.hashCode() : 0);
+        return hash;
     }
 
     @Override
     public boolean equals(Object object) {
-        // TODO PERSONA A: Implementar equals comparando ids
-        // Ver ejemplo en Topic.java
-        return false;
+        if (!(object instanceof Model)) {
+            return false;
+        }
+        Model other = (Model) object;
+        if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
     public String toString() {
-        // TODO PERSONA A: Retornar String con formato "Model[ id=X, name=Y, provider=Z ]"
-        return "Model[ id=? ]";
+        return "Model[ id=" + id + ", name=" + name + ", provider=" + provider + " ]";
     }
 }

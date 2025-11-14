@@ -138,7 +138,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     @Secured
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response create(Model model) {
+    public Response createModel(Model model) {
         // TODO PERSONA A: Implementar creación con validaciones
         
         return Response.status(Response.Status.NOT_IMPLEMENTED)
