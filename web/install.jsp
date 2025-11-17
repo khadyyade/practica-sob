@@ -42,54 +42,21 @@
                 
                 // 2. Insertar Modelos de prueba (2 privados, 2 públicos)
                 // Modelo privado 1: GPT-4 (OpenAI)
-                "INSERT INTO " + schema + ".MODEL VALUES (NEXT VALUE FOR MODEL_GEN, 'GPT-4.1-mini', 'OpenAI', 'Modelo optimizado para conversaciones rápidas con costes reducidos', 'GPT-4.1-mini es la versión compacta diseñada para aplicaciones rápidas', 'Custom', 32768, true, 'https://openai.com/favicon.ico', '2025-06-10', '2024-07-01', '2025-07-01')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER, SUMMARY, DESCRIPTION, LICENSE, MAXCONTEXTTOKENS, ISPRIVATE, LOGOURL, LASTVERSION, TRAININGDATE, LASTUPDATEDATE) VALUES (NEXT VALUE FOR MODEL_GEN, 'GPT-4.1-mini', 'OpenAI', 'Modelo optimizado para conversaciones rápidas con costes reducidos', 'GPT-4.1-mini es la versión compacta diseñada para aplicaciones rápidas', 'Custom', 32768, 1, 'https://openai.com/favicon.ico', '2025-06-10', DATE('2024-07-01'), DATE('2025-07-01'))",
                 
                 // Modelo privado 2: Claude (Anthropic)
-                "INSERT INTO " + schema + ".MODEL VALUES (NEXT VALUE FOR MODEL_GEN, 'Claude 3.5 Sonnet', 'Anthropic', 'Modelo avanzado con capacidades superiores en razonamiento y código', 'Claude 3.5 Sonnet combina velocidad y precisión en tareas complejas', 'Custom', 200000, true, 'https://anthropic.com/favicon.ico', '2025-08-15', '2024-09-01', '2025-08-15')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER, SUMMARY, DESCRIPTION, LICENSE, MAXCONTEXTTOKENS, ISPRIVATE, LOGOURL, LASTVERSION, TRAININGDATE, LASTUPDATEDATE) VALUES (NEXT VALUE FOR MODEL_GEN, 'Claude 3.5 Sonnet', 'Anthropic', 'Modelo avanzado con capacidades superiores en razonamiento y código', 'Claude 3.5 Sonnet combina velocidad y precisión en tareas complejas', 'Custom', 200000, 1, 'https://anthropic.com/favicon.ico', '2025-08-15', DATE('2024-09-01'), DATE('2025-08-15'))",
                 
                 // Modelo público 1: Mistral (Mistral AI)
-                "INSERT INTO " + schema + ".MODEL VALUES (NEXT VALUE FOR MODEL_GEN, 'Mistral Large 2', 'Mistral AI', 'Modelo open-source de alto rendimiento con licencia Apache 2.0', 'Mistral Large 2 ofrece rendimiento competitivo completamente abierto', 'Apache 2.0', 128000, false, 'https://mistral.ai/favicon.ico', '2025-05-20', '2024-06-01', '2025-05-20')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER, SUMMARY, DESCRIPTION, LICENSE, MAXCONTEXTTOKENS, ISPRIVATE, LOGOURL, LASTVERSION, TRAININGDATE, LASTUPDATEDATE) VALUES (NEXT VALUE FOR MODEL_GEN, 'Mistral Large 2', 'Mistral AI', 'Modelo open-source de alto rendimiento con licencia Apache 2.0', 'Mistral Large 2 ofrece rendimiento competitivo completamente abierto', 'Apache 2.0', 128000, 0, 'https://mistral.ai/favicon.ico', '2025-05-20', DATE('2024-06-01'), DATE('2025-05-20'))",
                 
                 // Modelo público 2: LLaMA (Meta)
-                "INSERT INTO " + schema + ".MODEL VALUES (NEXT VALUE FOR MODEL_GEN, 'LLaMA 3.1', 'Meta', 'Modelo open-source optimizado para multilingüe y razonamiento', 'LLaMA 3.1 con mejoras en capacidades multilingües y razonamiento', 'Permissive Open Source', 128000, false, 'https://llama.meta.com/favicon.ico', '2025-04-30', '2024-05-15', '2025-04-30')",
-                
-                // Insertar capabilities para cada modelo (tabla auxiliar MODEL_CAPABILITIES)
-                // GPT-4
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (1, 'chat-completion')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (1, 'code-generation')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (1, 'text-summarization')",
-                
-                // Claude
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (2, 'chat-completion')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (2, 'code-generation')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (2, 'reasoning')",
-                
-                // Mistral
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (3, 'chat-completion')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (3, 'code-generation')",
-                
-                // LLaMA
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (4, 'chat-completion')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (4, 'multilingual')",
-                "INSERT INTO " + schema + ".MODEL_CAPABILITIES VALUES (4, 'reasoning')",
-                
-                // Insertar inputTypes para cada modelo (tabla auxiliar MODEL_INPUT_TYPES)
-                "INSERT INTO " + schema + ".MODEL_INPUT_TYPES VALUES (1, 'text')",
-                "INSERT INTO " + schema + ".MODEL_INPUT_TYPES VALUES (2, 'text')",
-                "INSERT INTO " + schema + ".MODEL_INPUT_TYPES VALUES (2, 'image')",
-                "INSERT INTO " + schema + ".MODEL_INPUT_TYPES VALUES (3, 'text')",
-                "INSERT INTO " + schema + ".MODEL_INPUT_TYPES VALUES (4, 'text')",
-                
-                // Insertar outputTypes para cada modelo (tabla auxiliar MODEL_OUTPUT_TYPES)
-                "INSERT INTO " + schema + ".MODEL_OUTPUT_TYPES VALUES (1, 'text')",
-                "INSERT INTO " + schema + ".MODEL_OUTPUT_TYPES VALUES (2, 'text')",
-                "INSERT INTO " + schema + ".MODEL_OUTPUT_TYPES VALUES (3, 'text')",
-                "INSERT INTO " + schema + ".MODEL_OUTPUT_TYPES VALUES (4, 'text')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER, SUMMARY, DESCRIPTION, LICENSE, MAXCONTEXTTOKENS, ISPRIVATE, LOGOURL, LASTVERSION, TRAININGDATE, LASTUPDATEDATE) VALUES (NEXT VALUE FOR MODEL_GEN, 'LLaMA 3.1', 'Meta', 'Modelo open-source optimizado para multilingüe y razonamiento', 'LLaMA 3.1 con mejoras en capacidades multilingües y razonamiento', 'Permissive Open Source', 128000, 0, 'https://llama.meta.com/favicon.ico', '2025-04-30', DATE('2024-05-15'), DATE('2025-04-30'))",
                 
                 // 3. Insertar Customers (vinculados a Credentials mediante FK)
                 // NOTA: credentials_id debe coincidir con el ID de Credentials insertado arriba
-                "INSERT INTO " + schema + ".CUSTOMER VALUES (NEXT VALUE FOR CUSTOMER_GEN, 1, 3)",  // sob vio Mistral (modelo público id=3)
-                "INSERT INTO " + schema + ".CUSTOMER VALUES (NEXT VALUE FOR CUSTOMER_GEN, 2, NULL)"  // demo no ha visto nada todavía
+                "INSERT INTO " + schema + ".CUSTOMER (ID, CREDENTIALS_ID, ULTIMO_MODELO_VISITADO_ID, TELEFONO) VALUES (NEXT VALUE FOR CUSTOMER_GEN, (SELECT ID FROM " + schema + ".CREDENTIALS WHERE USERNAME='sob'), (SELECT ID FROM " + schema + ".MODEL WHERE NAME='Mistral Large 2'), '+34612345678')",
+                "INSERT INTO " + schema + ".CUSTOMER (ID, CREDENTIALS_ID, TELEFONO) VALUES (NEXT VALUE FOR CUSTOMER_GEN, (SELECT ID FROM " + schema + ".CREDENTIALS WHERE USERNAME='demo'), '+34698765432')"
             };
             for (String datum : data) {
                 if (stmt.executeUpdate(datum)<=0) {

@@ -3,7 +3,6 @@ package model.entities;
 import authn.Credentials;
 import java.io.Serializable;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -124,9 +123,8 @@ public class Customer implements Serializable {
     @JoinColumn(name = "ultimo_modelo_visitado_id")
     private Model ultimoModeloVisitado;
     
-    // Campo email del customer
-    @Email
-    private String email;
+    // Campo teléfono del customer
+    private String telefono;
 
     // Constructor vacío (requerido por JPA)
     public Customer() {
@@ -163,12 +161,12 @@ public class Customer implements Serializable {
         this.ultimoModeloVisitado = ultimoModeloVisitado;
     }
     
-    public String getEmail() {
-        return email;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
     
     public String getUsername() {

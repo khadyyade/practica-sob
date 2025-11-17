@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import model.entities.Customer;
+import model.entities.Model;
 
 import java.util.List;
 
@@ -58,23 +59,55 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
      * Devolvemos todos los customers
      * 
      * No consumimos ningún valor
-     * Pruducimos un archivo JSON con todos los campos de CUSTOMER
-     * jakarta.json
+     * Producimos un archivo JSON con todos los campos de CUSTOMER
+     * 
+     * IMPORTANTE: Construimos JSON manualmente para NO exponer passwords
      * 
      *  @NamedQuery(
      *      name = "Customer.findAll",
      *      query = "SELECT c FROM Customer c"
      *  )
      * 
-     * @return Lista JSON/XML de todos los customers
+     * @return Lista JSON de todos los customers (sin passwords)
      */
     @GET
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public List<Customer> findAll() {
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findAllCustomers() {
 
+        // Ejecutar NamedQuery para obtener todos los customers
         List<Customer> customers = em.createNamedQuery("Customer.findAll", Customer.class).getResultList();
         
-        return customers;
+        // Construir array JSON manualmente
+        jakarta.json.JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        
+        for (Customer customer : customers) {
+            // Construir objeto JSON para cada customer
+            JsonObjectBuilder customerBuilder = Json.createObjectBuilder()
+                    .add("id", customer.getId())
+                    .add("username", customer.getUsername());
+            
+            // Añadir teléfono si existe
+            if (customer.getTelefono() != null) {
+                customerBuilder.add("telefono", customer.getTelefono());
+            }
+            
+            // Añadir link HATEOAS si tiene último modelo visitado
+            Long ultimoModeloId = customer.getUltimoModeloVisitadoId();
+            if (ultimoModeloId != null) {
+                Model modelo = customer.getUltimoModeloVisitado();
+                JsonObject modelInfo = Json.createObjectBuilder()
+                        .add("id", modelo.getId())
+                        .add("nombre", modelo.getName())
+                        .add("link", "/rest/api/v1/models/" + ultimoModeloId)
+                        .build();
+                customerBuilder.add("ultimoModeloVisitado", modelInfo);
+            }
+            
+            arrayBuilder.add(customerBuilder);
+        }
+        
+        // Devolver array JSON
+        return Response.ok(arrayBuilder.build()).build();
 
     }
 
@@ -126,20 +159,25 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
                 .add("id", customer.getId())
                 .add("username", customer.getUsername());
         
-        // Añadir email si existe
-        if (customer.getEmail() != null) {
-            builder.add("email", customer.getEmail());
+        // Añadir teléfono si existe
+        if (customer.getTelefono() != null) {
+            builder.add("telefono", customer.getTelefono());
         }
         
-        // Añadimos el campo link
+        // Añadimos el último modelo visitado con su nombre
         Long ultimoModeloId = customer.getUltimoModeloVisitadoId();
         
         if (ultimoModeloId != null) {
-            // Construir el objeto "links" con el enlace al modelo
-            JsonObject links = Json.createObjectBuilder().add("model", "/rest/api/v1/models/" + ultimoModeloId).build();
+            Model modelo = customer.getUltimoModeloVisitado();
+            // Construir el objeto con nombre y link del modelo
+            JsonObject modelInfo = Json.createObjectBuilder()
+                    .add("id", modelo.getId())
+                    .add("nombre", modelo.getName())
+                    .add("link", "/rest/api/v1/models/" + ultimoModeloId)
+                    .build();
             
-            // Añadimos el link
-            builder.add("links", links);
+            // Añadimos el objeto modelo al JSON principal
+            builder.add("ultimoModeloVisitado", modelInfo);
         }
         
         // Construir la respuesta
@@ -156,7 +194,7 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
      * Modifica los datos del customer con identificador ${id}
      * Hay que estar autentificado
      * NO permite cambiar username ni credentials
-     * Cambia otros campos como ultimoModeloVisitadoId o email
+     * Cambia otros campos como ultimoModeloVisitadoId o telefono
      * 
      * Ejemplo de JSON a enviar:
      * {
@@ -191,11 +229,11 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
         // El JSON puede contener varios cambios (saber que valor contiene)
         for (String key : inputJson.keySet()) {
             switch (key) {
-            case "email":
+            case "telefono":
                 
-                // Obtener mail a modificar
-                String nuevoEmail = inputJson.getString("email");
-                existing.setEmail(nuevoEmail);
+                // Obtener teléfono a modificar
+                String nuevoTelefono = inputJson.getString("telefono");
+                existing.setTelefono(nuevoTelefono);
                 modificado = true;
                 break;
                 
@@ -203,7 +241,7 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
 
                 // Obtener modelo a modificar
                 Long modeloId = inputJson.getJsonNumber("ultimoModeloVisitadoId").longValue();
-                model.entities.Model modelo = em.find(model.entities.Model.class, modeloId);
+                Model modelo = em.find(Model.class, modeloId);
                 
                 if (modelo == null)
                     return Response.status(Response.Status.NOT_FOUND).entity("{\"error\": \"Model con id " + modeloId + " no encontrado\"}").build();
@@ -225,7 +263,7 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
             return Response.noContent().build();
         } else {
             // Rrror 400 Bad Request (no se ha modificado nada)
-            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Debes proporcionar 'email' o 'ultimoModeloVisitadoId' en el JSON\"}").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"Debes proporcionar 'telefono' o 'ultimoModeloVisitadoId' en el JSON\"}").build();
         }
     }
 
