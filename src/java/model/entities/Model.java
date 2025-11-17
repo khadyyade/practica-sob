@@ -3,11 +3,16 @@ package model.entities;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 @Entity
+@NamedQueries({
+    @NamedQuery(name = "Model.findAll", query = "SELECT m FROM Model m ORDER BY m.name"),
+    @NamedQuery(name = "Model.findByProvider", query = "SELECT m FROM Model m WHERE LOWER(m.provider.name) = LOWER(:provider) ORDER BY m.name")
+})
 @XmlRootElement
 
 public class Model implements Serializable {
@@ -17,22 +22,41 @@ public class Model implements Serializable {
     @SequenceGenerator(name="Model_Gen", allocationSize=1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Model_Gen") 
     private Long id;
+
     private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "provider_id")
     private Provider provider;
+
     private String summary;
+
     private String description;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "model_capability",
+        joinColumns = @JoinColumn(name = "model_id"),
+        inverseJoinColumns = @JoinColumn(name = "capability_id"))
     private List<Capability> capabilities;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "license_id")
     private License license;
+
     private boolean isPrivate;
+
     @Temporal(TemporalType.DATE)
     private Date trainingDate;
+
     @Temporal(TemporalType.DATE)
     private Date lastUpdateDate;
+
     private String version;
 
  //-------------------------------------Constructor--------------------------------- 
     public Model (){
         this.isPrivate = false;
+        this.capabilities = new ArrayList<>();
     }
 //--------------------------------Getters and Setters ------------------------------
 

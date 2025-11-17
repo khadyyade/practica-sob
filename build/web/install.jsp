@@ -39,7 +39,33 @@
                 "INSERT INTO " + schema + ".TOPIC VALUES (NEXT VALUE FOR TOPIC_GEN, 'Computer Science')",
                 "INSERT INTO " + schema + ".COMMENT VALUES (NEXT VALUE FOR COMMENT_GEN, 'Skeleton code', 1)",
                 "INSERT INTO " + schema + ".COMMENT VALUES (NEXT VALUE FOR COMMENT_GEN, 'for homework1', 1)",
-                "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'sob', 'sob')"
+                // Providers
+                "INSERT INTO " + schema + ".PROVIDER VALUES (NEXT VALUE FOR PROVIDER_GEN, 'OpenAI')",
+                "INSERT INTO " + schema + ".PROVIDER VALUES (NEXT VALUE FOR PROVIDER_GEN, 'Mistral')",
+                "INSERT INTO " + schema + ".PROVIDER VALUES (NEXT VALUE FOR PROVIDER_GEN, 'Anthropic')",
+                // Licenses
+                "INSERT INTO " + schema + ".LICENSE VALUES (NEXT VALUE FOR LICENSE_GEN, 'Proprietary')",
+                "INSERT INTO " + schema + ".LICENSE VALUES (NEXT VALUE FOR LICENSE_GEN, 'Apache-2.0')",
+                // Capabilities
+                "INSERT INTO " + schema + ".CAPABILITY VALUES (NEXT VALUE FOR CAPABILITY_GEN, 'chat-completion')",
+                "INSERT INTO " + schema + ".CAPABILITY VALUES (NEXT VALUE FOR CAPABILITY_GEN, 'code-generation')",
+                "INSERT INTO " + schema + ".CAPABILITY VALUES (NEXT VALUE FOR CAPABILITY_GEN, 'text-to-image')",
+                "INSERT INTO " + schema + ".CAPABILITY VALUES (NEXT VALUE FOR CAPABILITY_GEN, 'audio-generation')",
+                // Models
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER_ID, SUMMARY, DESCRIPTION, LICENSE_ID, ISPRIVATE, TRAININGDATE, LASTUPDATEDATE, VERSION) VALUES (NEXT VALUE FOR MODEL_GEN, 'GPT-4', (SELECT ID FROM " + schema + ".PROVIDER WHERE NAME='OpenAI'), 'Powerful LLM', 'GPT-4 description', (SELECT ID FROM " + schema + ".LICENSE WHERE NAME='Proprietary'), 1, '2024-07-01', '2024-07-01', '4.0')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER_ID, SUMMARY, DESCRIPTION, LICENSE_ID, ISPRIVATE, TRAININGDATE, LASTUPDATEDATE, VERSION) VALUES (NEXT VALUE FOR MODEL_GEN, 'Mistral-Base', (SELECT ID FROM " + schema + ".PROVIDER WHERE NAME='Mistral'), 'Lightweight model', 'Mistral description', (SELECT ID FROM " + schema + ".LICENSE WHERE NAME='Apache-2.0'), 0, '2024-06-01', '2024-06-15', '1.0')",
+                "INSERT INTO " + schema + ".MODEL (ID, NAME, PROVIDER_ID, SUMMARY, DESCRIPTION, LICENSE_ID, ISPRIVATE, TRAININGDATE, LASTUPDATEDATE, VERSION) VALUES (NEXT VALUE FOR MODEL_GEN, 'Claude', (SELECT ID FROM " + schema + ".PROVIDER WHERE NAME='Anthropic'), 'Assistant model', 'Claude description', (SELECT ID FROM " + schema + ".LICENSE WHERE NAME='Proprietary'), 0, '2024-05-10', '2024-05-20', '2.1')",
+                // model-capability relations
+                "INSERT INTO " + schema + ".MODEL_CAPABILITY VALUES ((SELECT ID FROM " + schema + ".MODEL WHERE NAME='GPT-4'), (SELECT ID FROM " + schema + ".CAPABILITY WHERE NAME='chat-completion'))",
+                "INSERT INTO " + schema + ".MODEL_CAPABILITY VALUES ((SELECT ID FROM " + schema + ".MODEL WHERE NAME='GPT-4'), (SELECT ID FROM " + schema + ".CAPABILITY WHERE NAME='code-generation'))",
+                "INSERT INTO " + schema + ".MODEL_CAPABILITY VALUES ((SELECT ID FROM " + schema + ".MODEL WHERE NAME='Mistral-Base'), (SELECT ID FROM " + schema + ".CAPABILITY WHERE NAME='chat-completion'))",
+                "INSERT INTO " + schema + ".MODEL_CAPABILITY VALUES ((SELECT ID FROM " + schema + ".MODEL WHERE NAME='Claude'), (SELECT ID FROM " + schema + ".CAPABILITY WHERE NAME='chat-completion'))",
+                //customers
+                "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'sob', 'sob')",
+                "INSERT INTO " + schema + ".CREDENTIALS VALUES (NEXT VALUE FOR CREDENTIALS_GEN, 'demo', 'demo')",
+
+                "INSERT INTO " + schema + ".CUSTOMER (ID, CREDENTIALS_ID, ULTIMO_MODELO_VISITADO_ID, TELEFONO) VALUES (NEXT VALUE FOR CUSTOMER_GEN, (SELECT ID FROM " + schema + ".CREDENTIALS WHERE USERNAME='sob'), (SELECT ID FROM " + schema + ".MODEL WHERE NAME='Mistral Large 2'), '+34612345678')",
+                "INSERT INTO " + schema + ".CUSTOMER (ID, CREDENTIALS_ID, TELEFONO) VALUES (NEXT VALUE FOR CUSTOMER_GEN, (SELECT ID FROM " + schema + ".CREDENTIALS WHERE USERNAME='demo'), '+34698765432')"
             };
             for (String datum : data) {
                 if (stmt.executeUpdate(datum)<=0) {

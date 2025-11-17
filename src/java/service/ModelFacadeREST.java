@@ -11,35 +11,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import model.entities.Model;
+import model.entities.Capability;
 
 import java.net.URI;
 import java.util.List;
 
-/**
- * Servicio REST para gestionar modelos LLM
- * 
- * TODO PERSONA A: Implementar los siguientes endpoints:
- * 
- * 1. GET /models → Lista todos los modelos (con filtros opcionales)
- *    - Query params: capability (0-2 veces), provider
- *    - Debe usar queries JPQL/NamedQueries (NO filtrar en Java)
- * 
- * 2. GET /models/{id} → Devuelve detalles completos
- *    - Si model.isPrivate() == true y no hay auth → devolver 401
- * 
- * 3. POST /models → Crea modelo (requiere @Secured)
- *    - Validar campos obligatorios
- *    - Devolver 201 Created con Location header
- * 
- * 4. PUT /models/{id} → Actualiza modelo (OPCIONAL, requiere @Secured)
- * 
- * 5. DELETE /models/{id} → Elimina modelo (OPCIONAL, requiere @Secured)
- * 
- * HINTS:
- * - Mirar CommentFacadeREST.java como ejemplo
- * - Para construir JPQL dinámico, usar StringBuilder
- * - Para múltiples capabilities usar: ":capability0 MEMBER OF m.capabilities"
- */
 @Stateless
 @Path("models")
 public class ModelFacadeREST extends AbstractFacade<Model> {
@@ -55,18 +31,8 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     }
 
     /**
-     * GET /models
-     * 
-     * TODO PERSONA A: Implementar listado con filtros
-     * 
-     * Casos a manejar:
-     * 1. Sin filtros → usar NamedQuery "Model.findAll"
-     * 2. Solo provider → usar NamedQuery "Model.findByProvider"
-     * 3. Con capabilities (1 o 2) → construir JPQL dinámico:
-     *    "SELECT m FROM Model m WHERE :capability0 MEMBER OF m.capabilities [AND :capability1 MEMBER OF m.capabilities] [AND LOWER(m.provider) = LOWER(:provider)] ORDER BY m.name"
-     * 4. Validar que no haya más de 2 capabilities → devolver 400 Bad Request
-     * 
-     * @param capabilities Lista de capabilities (puede estar vacía)
+     * GET /models 
+     * @param capabilities Lista de capabilities    
      * @param provider Proveedor opcional
      * @return Response con lista de modelos o error
      */
@@ -75,61 +41,103 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     public Response findAll(
             @QueryParam("capability") List<String> capabilities,
             @QueryParam("provider") String provider) {
-        
-        // TODO PERSONA A: Implementar la lógica de filtrado
-        // 1. Verificar si capabilities es null o vacía y provider es null → usar Model.findAll
-        // 2. Si solo hay provider (sin capabilities) → usar Model.findByProvider
-        // 3. Si hay capabilities:
-        //    - Validar que capabilities.size() <= 2
-        //    - Construir query JPQL dinámica
-        //    - Añadir condiciones para cada capability
-        //    - Añadir condición de provider si existe
-        // 4. Ejecutar query y devolver Response.ok(models)
-        // 5. Capturar excepciones y devolver Response.status(500) con mensaje de error
-        
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("{\"error\": \"TODO: Implementar findAll\"}")
-                .build();
+        try {
+            // No filters (findAll)
+            if ((capabilities == null || capabilities.isEmpty()) && (provider == null || provider.trim().isEmpty())) {
+                List<Model> models = em.createNamedQuery("Model.findAll", Model.class).getResultList();
+                return Response.ok(models).build();
+            }
+
+            // Only provider (findByProvider)
+            if ((capabilities == null || capabilities.isEmpty()) && provider != null && !provider.trim().isEmpty()) {
+                List<Model> models = em.createNamedQuery("Model.findByProvider", Model.class)
+                        .setParameter("provider", provider)
+                        .getResultList();
+                return Response.ok(models).build();
+            }
+
+            // Hay capabilities (JPQL dinámico)
+            if (capabilities != null && !capabilities.isEmpty()) {
+                if (capabilities.size() > 2) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("{\"error\": \"Maximum 2 capabilities allowed\"}")
+                            .build();
+                }
+
+                StringBuilder jpql = new StringBuilder("SELECT DISTINCT m FROM Model m ");
+                if (capabilities.size() == 1) {
+                    jpql.append("JOIN m.capabilities c0 WHERE LOWER(c0.name) = LOWER(:cap0)");
+                    if (provider != null && !provider.trim().isEmpty()) {
+                        jpql.append(" AND LOWER(m.provider.name) = LOWER(:provider)");
+                    }
+                } else {
+                    // si hay dos capacidades se hacen dos joins
+                    jpql.append("JOIN m.capabilities c0 JOIN m.capabilities c1 WHERE LOWER(c0.name) = LOWER(:cap0) AND LOWER(c1.name) = LOWER(:cap1)");
+                    if (provider != null && !provider.trim().isEmpty()) {
+                        jpql.append(" AND LOWER(m.provider.name) = LOWER(:provider)");
+                    }
+                }
+                jpql.append(" ORDER BY m.name");
+
+                TypedQuery<Model> query = em.createQuery(jpql.toString(), Model.class);
+                // set capability params
+                query.setParameter("cap0", capabilities.get(0));
+                if (capabilities.size() > 1) {
+                    query.setParameter("cap1", capabilities.get(1));
+                }
+                if (provider != null && !provider.trim().isEmpty()) {
+                    query.setParameter("provider", provider);
+                }
+
+                List<Model> models = query.getResultList();
+                return Response.ok(models).build();
+            }
+
+            // Fallback
+            return Response.ok().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     /**
      * GET /models/{id}
      * 
-     * TODO PERSONA A: Implementar obtención de modelo por ID
-     * 
-     * Pasos:
-     * 1. Buscar model con super.find(id)
-     * 2. Si model == null → devolver 404 Not Found
-     * 3. Si model.isPrivate() == true Y authHeader es null/vacío → devolver 401 Unauthorized
-     * 4. Si todo OK → devolver 200 con el modelo
-     * 
      * @param id ID del modelo
-     * @param authHeader Header de autorización (puede ser null)
+     * @param authHeader Header de autorización 
      * @return Response con modelo o error
      */
     @GET
     @Path("{id}")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response find(@PathParam("id") Long id, @HeaderParam("Authorization") String authHeader) {
-        // TODO PERSONA A: Implementar búsqueda por ID
-        
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("{\"error\": \"TODO: Implementar find\"}")
-                .build();
+        try {
+            Model model = super.find(id);
+            if (model == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Model not found\"}")
+                        .build();
+            }
+
+            // If private and no auth header -> 401
+            if (model.isIsPrivate() && (authHeader == null || authHeader.trim().isEmpty())) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("{\"error\": \"Authentication required\"}")
+                        .build();
+            }
+
+            return Response.ok(model).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     /**
      * POST /models
-     * 
-     * TODO PERSONA A: Implementar creación de modelo
-     * 
-     * Pasos:
-     * 1. Validar que model.getName() no sea null ni vacío → 400 Bad Request
-     * 2. Validar que model.getProvider() no sea null ni vacío → 400 Bad Request
-     * 3. Validar que maxContextTokens (si existe) sea > 0 → 400 Bad Request
-     * 4. Persistir con super.create(model)
-     * 5. Construir URI del nuevo recurso: uriInfo.getAbsolutePathBuilder().path(model.getId().toString()).build()
-     * 6. Devolver Response.created(location).entity(model).build()
      * 
      * @param model Modelo a crear (desde JSON)
      * @return Response 201 Created o error
@@ -138,26 +146,39 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     @Secured
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response create(Model model) {
-        // TODO PERSONA A: Implementar creación con validaciones
-        
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("{\"error\": \"TODO: Implementar create\"}")
-                .build();
+    public Response createModel(Model model) {
+        try {
+            if (model == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Model payload is required\"}")
+                        .build();
+            }
+
+            if (model.getName() == null || model.getName().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Model name is required\"}")
+                        .build();
+            }
+
+            if (model.getProvider() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Provider is required\"}")
+                        .build();
+            }
+
+            // Persist
+            super.create(model);
+            URI location = uriInfo.getAbsolutePathBuilder().path(model.getId().toString()).build();
+            return Response.created(location).entity(model).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     /**
      * PUT /models/{id}
-     * OPCIONAL
-     * 
-     * TODO PERSONA A (OPCIONAL): Implementar actualización
-     * 
-     * Pasos:
-     * 1. Buscar modelo existente con super.find(id)
-     * 2. Si no existe → 404 Not Found
-     * 3. Asignar id al modelo recibido: model.setId(id)
-     * 4. Actualizar con super.edit(model)
-     * 5. Devolver 200 OK con modelo actualizado
      */
     @PUT
     @Path("{id}")
@@ -165,34 +186,46 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response edit(@PathParam("id") Long id, Model model) {
-        // TODO PERSONA A (OPCIONAL): Implementar actualización
-        
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("{\"error\": \"TODO OPCIONAL: Implementar edit\"}")
-                .build();
+        try {
+            Model existing = super.find(id);
+            if (existing == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Model not found\"}")
+                        .build();
+            }
+
+            model.setId(id);
+            super.edit(model);
+            return Response.ok(model).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     /**
      * DELETE /models/{id}
-     * OPCIONAL
-     * 
-     * TODO PERSONA A (OPCIONAL): Implementar eliminación
-     * 
-     * Pasos:
-     * 1. Buscar modelo con super.find(id)
-     * 2. Si no existe → 404 Not Found
-     * 3. Eliminar con super.remove(model)
-     * 4. Devolver 204 No Content
      */
     @DELETE
     @Path("{id}")
     @Secured
     public Response remove(@PathParam("id") Long id) {
-        // TODO PERSONA A (OPCIONAL): Implementar eliminación
-        
-        return Response.status(Response.Status.NOT_IMPLEMENTED)
-                .entity("{\"error\": \"TODO OPCIONAL: Implementar remove\"}")
-                .build();
+        try {
+            Model existing = super.find(id);
+            if (existing == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Model not found\"}")
+                        .build();
+            }
+
+            super.remove(existing);
+            return Response.noContent().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     @Override
