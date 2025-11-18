@@ -16,7 +16,8 @@ public class Provider implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Provider_Gen") 
     private Long id;
     private String name;
-
+    
+    @jakarta.xml.bind.annotation.XmlTransient
     @OneToMany(mappedBy = "provider", fetch = FetchType.LAZY)
     private List<Model> models;
 

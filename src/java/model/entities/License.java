@@ -16,7 +16,8 @@ public class License implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "License_Gen") 
     private Long id;
     private String name;
-
+    
+    @jakarta.xml.bind.annotation.XmlTransient
     @OneToMany(mappedBy = "license", fetch = FetchType.LAZY)
     private List<Model> models;
 

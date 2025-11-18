@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.GenericEntity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -42,10 +43,16 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             @QueryParam("capability") List<String> capabilities,
             @QueryParam("provider") String provider) {
         try {
+            // Limpiar capabilities vacías que envía el test de NetBeans
+            if (capabilities != null) {
+                capabilities.removeIf(c -> c == null || c.trim().isEmpty());
+            }
+            
             // No filters (findAll)
             if ((capabilities == null || capabilities.isEmpty()) && (provider == null || provider.trim().isEmpty())) {
                 List<Model> models = em.createNamedQuery("Model.findAll", Model.class).getResultList();
-                return Response.ok(models).build();
+                GenericEntity<List<Model>> entity = new GenericEntity<List<Model>>(models) {};
+                return Response.ok(entity).build();
             }
 
             // Only provider (findByProvider)
@@ -53,7 +60,8 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
                 List<Model> models = em.createNamedQuery("Model.findByProvider", Model.class)
                         .setParameter("provider", provider)
                         .getResultList();
-                return Response.ok(models).build();
+                GenericEntity<List<Model>> entity = new GenericEntity<List<Model>>(models) {};
+                return Response.ok(entity).build();
             }
 
             // Hay capabilities (JPQL dinámico)
@@ -90,12 +98,14 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
                 }
 
                 List<Model> models = query.getResultList();
-                return Response.ok(models).build();
+                GenericEntity<List<Model>> entity = new GenericEntity<List<Model>>(models) {};
+                return Response.ok(entity).build();
             }
 
             // Fallback
             List<Model> models = em.createNamedQuery("Model.findAll", Model.class).getResultList();
-            return Response.ok(models).build();
+            GenericEntity<List<Model>> entity = new GenericEntity<List<Model>>(models) {};
+            return Response.ok(entity).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\": \"" + e.getMessage() + "\"}")

@@ -23,7 +23,8 @@ public class Capability implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String name;
-
+    
+    @jakarta.xml.bind.annotation.XmlTransient
     @ManyToMany(mappedBy = "capabilities", fetch = FetchType.LAZY)
     private List<Model> models;
 
