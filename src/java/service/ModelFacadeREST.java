@@ -94,7 +94,8 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             }
 
             // Fallback
-            return Response.ok().build();
+            List<Model> models = em.createNamedQuery("Model.findAll", Model.class).getResultList();
+            return Response.ok(models).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\": \"" + e.getMessage() + "\"}")
@@ -106,25 +107,18 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
      * GET /models/{id}
      * 
      * @param id ID del modelo
-     * @param authHeader Header de autorización 
      * @return Response con modelo o error
      */
     @GET
     @Path("{id}")
+    @Secured
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-    public Response find(@PathParam("id") Long id, @HeaderParam("Authorization") String authHeader) {
+    public Response find(@PathParam("id") Long id) {
         try {
             Model model = super.find(id);
             if (model == null) {
                 return Response.status(Response.Status.NOT_FOUND)
                         .entity("{\"error\": \"Model not found\"}")
-                        .build();
-            }
-
-            // If private and no auth header -> 401
-            if (model.isIsPrivate() && (authHeader == null || authHeader.trim().isEmpty())) {
-                return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("{\"error\": \"Authentication required\"}")
                         .build();
             }
 
