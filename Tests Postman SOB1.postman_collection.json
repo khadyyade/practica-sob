@@ -1,0 +1,1466 @@
+{
+	"info": {
+		"_postman_id": "cb0099fa-bf52-4dc9-8b73-399e9380b8ab",
+		"name": "Tests Postman SOB1",
+		"description": "Juego de pruebas para todo el proyecto (modelos y customers)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50137443",
+		"_collection_link": "https://garcilaso05-4614738.postman.co/workspace/Roger-Garc%C3%ADa-Doncel's-Workspace~47e9dc91-dc6f-4796-8a82-751f16cb4f05/collection/50137443-cb0099fa-bf52-4dc9-8b73-399e9380b8ab?action=share&source=collection_link&creator=50137443"
+	},
+	"item": [
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "GET All Customers",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Response is an array\", function () {",
+									"    pm.response.to.be.json;",
+									"    const responseJson = pm.response.json();",
+									"    pm.expect(responseJson).to.be.an('array');",
+									"});",
+									"pm.test(\"Cada elemento contiene las propiedades mínimas\", function () {",
+									"    const list = pm.response.json();",
+									"    list.forEach(c => {",
+									"        pm.expect(c).to.have.property(\"id\");",
+									"        pm.expect(c).to.have.property(\"telefono\");",
+									"        pm.expect(c).to.have.property(\"username\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/customer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Customer by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe devolver 200 OK\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include('sob');",
+									"});",
+									"pm.test(\"Debe devolver el customer correcto\", () => {",
+									"    const c = pm.response.json();",
+									"    pm.expect(c).to.have.property(\"id\", 1);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Customer by ID (Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe devolver 404 Not Found\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Mensaje de error correcto\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"no encontrado\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/customer/99999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Customer (No Auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe devolver 401 Unauthorized\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"telefono\": \"+34999888777\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Customer (With Auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Podemos cambiar los dos campos\n{\"ultimoModeloVisitadoId\" : 1,\n\"telefon\" : \"+34648706708\"}\n// O uno solo\n\n/*\n{\"telefon\" : \"+34000000000\"}\n*/"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Customer (With Auth) - Body vacío",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Responde 400 Bad Request por body vacío\", () => {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Customer (With Auth) - Campos desconocidos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ignora campos desconocidos o devuelve 400\", () => {",
+									"    pm.expect([200,204,400]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"telefono\": \"+346600112233\",\n  \"campoQueNoExiste\": \"xxx\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Customer (With Auth) - Modelo inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe devolver 404 si el modelo no existe\", () => {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ultimoModeloVisitadoId\": 999999\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"DELETE no permitido\", () => {",
+									"    pm.response.to.have.status(405);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/customer/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"customer",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Juego de pruebas para todos los metodos de customers"
+		},
+		{
+			"name": "Models",
+			"item": [
+				{
+					"name": "GET All Models",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"Debe devolver un array\", () => {",
+									"    const data = pm.response.json();",
+									"    pm.expect(data).to.be.an(\"array\");",
+									"});",
+									"pm.test(\"Los modelos están ordenados por nombre\", () => {",
+									"    const data = pm.response.json();",
+									"    const sorted = [...data].sort((a, b) => a.name.localeCompare(b.name));",
+									"    pm.expect(data).to.eql(sorted);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Models by Capability",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Cada modelo contiene la capability pedida\", () => {",
+									"    const list = pm.response.json();",
+									"    list.forEach(m => {",
+									"        const caps = m.capabilities.map(c => c.name.toLowerCase());",
+									"        pm.expect(caps).to.include(\"code generation\".toLowerCase());",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models?capability=Code Generation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							],
+							"query": [
+								{
+									"key": "capability",
+									"value": "Code Generation"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Models by Provider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Filtra correctamente por provider\", () => {",
+									"    const data = pm.response.json();",
+									"    data.forEach(m => {",
+									"        pm.expect(m.provider.name.toLowerCase()).to.eql(\"openai\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models?provider=openai",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							],
+							"query": [
+								{
+									"key": "provider",
+									"value": "openai"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Models by Two Capabilities (válido)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Cada modelo tiene ambas capacidades\", () => {",
+									"    const data = pm.response.json();",
+									"    data.forEach(m => {",
+									"        const caps = m.capabilities.map(c => c.name.toLowerCase());",
+									"        pm.expect(caps).to.include(\"chat-completion\");",
+									"        pm.expect(caps).to.include(\"code-generation\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models?capability=chat-completion&capability=code-generation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							],
+							"query": [
+								{
+									"key": "capability",
+									"value": "chat-completion"
+								},
+								{
+									"key": "capability",
+									"value": "code-generation"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Models by More Than 2 Capabilities (debe fallar)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 400\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Mensaje de error correcto\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Maximum 2 capabilities allowed\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models?capability=a&capability=b&capability=c",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							],
+							"query": [
+								{
+									"key": "capability",
+									"value": "a"
+								},
+								{
+									"key": "capability",
+									"value": "b"
+								},
+								{
+									"key": "capability",
+									"value": "c"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Models by Capability + Provider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Filtra por capability y provider\", () => {",
+									"    const data = pm.response.json();",
+									"    data.forEach(m => {",
+									"        const caps = m.capabilities.map(c => c.name.toLowerCase());",
+									"        pm.expect(caps).to.include(\"chat-completion\");",
+									"        pm.expect(m.provider.name.toLowerCase()).to.eql(\"openai\");",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models?capability=chat-completion&provider=openai",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							],
+							"query": [
+								{
+									"key": "capability",
+									"value": "chat-completion"
+								},
+								{
+									"key": "provider",
+									"value": "openai"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Private Model (No Auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 Unauthorized\", () => pm.response.to.have.status(401));",
+									"pm.test(\"Debe incluir WWW-Authenticate\", () => {",
+									"    pm.expect(pm.response.headers.has(\"WWW-Authenticate\")).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Private Model (With Auth)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET Private Model (With Auth) - ID inexistente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+									"pm.test(\"Body contiene 'Model not found'\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Model not found\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/99999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"// Guardar el ID del nuevo modelo para usarlo en otros requests",
+									"const response = pm.response.json();",
+									"pm.collectionVariables.set(\"newModelId\", response.id);",
+									"",
+									"pm.test(\"El modelo tiene ID asignado\", () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.id).to.be.a(\"number\");",
+									"});",
+									"",
+									"pm.test(\"El provider está presente\", () => {",
+									"    const body = pm.response.json();",
+									"    pm.expect(body.provider).to.be.an(\"object\");",
+									"});",
+									"",
+									"pm.test(\"La ubicación Location devuelve la URL correcta\", () => {",
+									"    const location = pm.response.headers.get(\"Location\");",
+									"    pm.expect(location).to.include(\"/models/\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Model\",\n    \"provider\": {\n        \"name\": \"Test Provider\"\n    },\n    \"summary\": \"A model for testing purposes\",\n    \"isPrivate\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model - Sin Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe devolver 401\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test Model\",\n    \"provider\": {\n        \"name\": \"Test Provider\"\n    },\n    \"summary\": \"A model for testing purposes\",\n    \"isPrivate\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model - Payload nulo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Devuelve mensaje correcto\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Model payload is required\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model - Sin name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Error por falta de nombre\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Model name is required\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": { \"name\": \"openai\" }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model - Sin provider",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
+									"pm.test(\"Debe fallar por provider\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Provider is required\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"GPT-999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Model - Provider no existe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Debe fallar porque el provider no existe\", () => {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400,404]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test Model\",\n  \"provider\": { \"name\": \"ProviderQueNoExiste\" }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Model - Correcto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));",
+									"pm.test(\"Devuelve el modelo editado\", () => {",
+									"    const m = pm.response.json();",
+									"    pm.expect(m).to.have.property(\"name\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Model Name\",\n    \"summary\": \"Updated summary\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models/{{newModelId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"{{newModelId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Model - Sin Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 Unauthorized\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Model Name\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Model - Modelo no existe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 Model not found\", () => pm.response.to.have.status(404));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Model Name\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models/99999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT Update Model - Body inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"400 or 500 según validaciones\", () => {",
+									"    pm.expect([400,500]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/models/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Model - Correcto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"204 No Content\", () => pm.response.to.have.status(204));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/{{newModelId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"{{newModelId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Model - Sin Auth",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"401 Unauthorized\", () => pm.response.to.have.status(401));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE Model - Modelo no existe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"404 Model not found\", () => pm.response.to.have.status(404));"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/models/99999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"models",
+								"99999"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Juego de pruebas para todos los metodos de models"
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/practica-sob/rest/api/v1"
+		}
+	]
+}
