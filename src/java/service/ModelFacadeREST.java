@@ -68,8 +68,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             if (capabilities != null && !capabilities.isEmpty()) {
                 if (capabilities.size() > 2) {
                     return Response.status(Response.Status.BAD_REQUEST)
-                            .entity(new GenericExceptionMapper.ErrorResponse(
-                                400, "Bad Request", "Maximum 2 capabilities allowed"))
+                            .entity("Maximum 2 capabilities allowed")
                             .build();
                 }
 
@@ -109,8 +108,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             return Response.ok(entity).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new GenericExceptionMapper.ErrorResponse(
-                        500, "Internal Server Error", e.getMessage()))
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -129,8 +127,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             Model model = super.find(id);
             if (model == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            404, "Not Found", "Model not found"))
+                        .entity("Model not found")
                         .build();
             }
 
@@ -138,16 +135,14 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             if (model.isIsPrivate() && (authHeader == null || authHeader.isEmpty())) {
                 return Response.status(Response.Status.UNAUTHORIZED)
                         .header("WWW-Authenticate", "Basic realm=\"practica-sob\"")
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            401, "Unauthorized", "Authentication required for private models"))
+                        .entity("Authentication required for private models")
                         .build();
             }
 
             return Response.ok(model).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new GenericExceptionMapper.ErrorResponse(
-                        500, "Internal Server Error", e.getMessage()))
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -166,22 +161,19 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
         try {
             if (model == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            400, "Bad Request", "Model payload is required"))
+                        .entity("Model payload is required")
                         .build();
             }
 
             if (model.getName() == null || model.getName().trim().isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            400, "Bad Request", "Model name is required"))
+                        .entity("Model name is required")
                         .build();
             }
 
             if (model.getProvider() == null) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            400, "Bad Request", "Provider is required"))
+                        .entity("Provider is required")
                         .build();
             }
 
@@ -199,8 +191,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
                 } catch (Exception e) {
                     // Provider no existe
                     return Response.status(Response.Status.BAD_REQUEST)
-                            .entity(new GenericExceptionMapper.ErrorResponse(
-                                400, "Bad Request", "Provider '" + model.getProvider().getName() + "' does not exist"))
+                            .entity("Provider '" + model.getProvider().getName() + "' does not exist")
                             .build();
                 }
             }
@@ -228,8 +219,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new GenericExceptionMapper.ErrorResponse(
-                        500, "Internal Server Error", e.getMessage()))
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -244,11 +234,81 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     public Response edit(@PathParam("id") Long id, Model model) {
         try {
+            if (model == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Model payload is required")
+                        .build();
+            }
+
             Model existing = super.find(id);
             if (existing == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            404, "Not Found", "Model not found"))
+                        .entity("Model not found")
+                        .build();
+            }
+
+            // Validar que se proporcione al menos un campo para actualizar
+            boolean hasValidField = false;
+            
+            if (model.getName() != null && !model.getName().trim().isEmpty()) {
+                hasValidField = true;
+            } else if (model.getName() != null && model.getName().trim().isEmpty()) {
+                // Si el nombre está presente pero vacío, es un error
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("Model name cannot be empty")
+                        .build();
+            }
+            
+            if (model.getSummary() != null) {
+                hasValidField = true;
+            }
+            
+            if (model.getDescription() != null) {
+                hasValidField = true;
+            }
+            
+            if (model.getVersion() != null) {
+                hasValidField = true;
+            }
+            
+            if (model.getProvider() != null) {
+                hasValidField = true;
+                if (model.getProvider().getName() == null || model.getProvider().getName().trim().isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Provider name cannot be empty if provider is specified")
+                            .build();
+                }
+                
+                // Buscar el provider si solo tiene nombre
+                if (model.getProvider().getId() == null) {
+                    TypedQuery<model.entities.Provider> query = em.createQuery(
+                        "SELECT p FROM Provider p WHERE LOWER(p.name) = LOWER(:name)", 
+                        model.entities.Provider.class);
+                    query.setParameter("name", model.getProvider().getName());
+                    
+                    try {
+                        model.entities.Provider existingProvider = query.getSingleResult();
+                        model.setProvider(existingProvider);
+                    } catch (Exception e) {
+                        return Response.status(Response.Status.BAD_REQUEST)
+                                .entity("Provider '" + model.getProvider().getName() + "' does not exist")
+                                .build();
+                    }
+                }
+            }
+            
+            if (model.getLicense() != null) {
+                hasValidField = true;
+            }
+            
+            if (model.getCapabilities() != null && !model.getCapabilities().isEmpty()) {
+                hasValidField = true;
+            }
+
+            // Si no hay ningún campo válido para actualizar
+            if (!hasValidField) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("At least one valid field must be provided for update")
                         .build();
             }
 
@@ -257,8 +317,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             return Response.ok(model).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new GenericExceptionMapper.ErrorResponse(
-                        500, "Internal Server Error", e.getMessage()))
+                    .entity(e.getMessage())
                     .build();
         }
     }
@@ -274,8 +333,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             Model existing = super.find(id);
             if (existing == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity(new GenericExceptionMapper.ErrorResponse(
-                            404, "Not Found", "Model not found"))
+                        .entity("Model not found")
                         .build();
             }
 
@@ -283,8 +341,7 @@ public class ModelFacadeREST extends AbstractFacade<Model> {
             return Response.noContent().build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new GenericExceptionMapper.ErrorResponse(
-                        500, "Internal Server Error", e.getMessage()))
+                    .entity(e.getMessage())
                     .build();
         }
     }
