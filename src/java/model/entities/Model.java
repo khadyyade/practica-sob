@@ -25,7 +25,7 @@ public class Model implements Serializable {
 
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "provider_id")
     private Provider provider;
 
@@ -33,13 +33,13 @@ public class Model implements Serializable {
 
     private String description;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "model_capability",
         joinColumns = @JoinColumn(name = "model_id"),
         inverseJoinColumns = @JoinColumn(name = "capability_id"))
     private List<Capability> capabilities;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "license_id")
     private License license;
 
