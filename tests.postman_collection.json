@@ -1,11 +1,11 @@
 {
 	"info": {
-		"_postman_id": "cb0099fa-bf52-4dc9-8b73-399e9380b8ab",
+		"_postman_id": "ba295fc3-a895-478a-8d97-1caa8f7dfb3b",
 		"name": "Tests Postman SOB1",
 		"description": "Juego de pruebas para todo el proyecto (modelos y customers)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "50137443",
-		"_collection_link": "https://garcilaso05-4614738.postman.co/workspace/Roger-Garc%C3%ADa-Doncel's-Workspace~47e9dc91-dc6f-4796-8a82-751f16cb4f05/collection/50137443-cb0099fa-bf52-4dc9-8b73-399e9380b8ab?action=share&source=collection_link&creator=50137443"
+		"_exporter_id": "50081240",
+		"_collection_link": "https://khady0804-6501127.postman.co/workspace/Khady's-Workspace~8a422da7-75c2-4c48-802d-2a49ee3a572d/collection/50081240-ba295fc3-a895-478a-8d97-1caa8f7dfb3b?action=share&source=collection_link&creator=50081240"
 	},
 	"item": [
 		{
@@ -977,14 +977,31 @@
 								"exec": [
 									"pm.test(\"400 Bad Request\", () => pm.response.to.have.status(400));",
 									"pm.test(\"Devuelve mensaje correcto\", () => {",
-									"    pm.expect(pm.response.text()).to.include(\"Model payload is required\");",
+									"    pm.expect(pm.response.text()).to.include(\"Bad Request\");",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1020,11 +1037,28 @@
 									"    pm.expect(pm.response.text()).to.include(\"Model name is required\");",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1060,11 +1094,28 @@
 									"    pm.expect(pm.response.text()).to.include(\"Provider is required\");",
 									"});"
 								],
-								"type": "text/javascript"
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
 							}
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sob",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "sob",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -1475,7 +1526,11 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:8080/practica-sob/rest/api/v1"
+			"value": "http://localhost:8080/projecte/rest/api/v1"
+		},
+		{
+			"key": "newModelId",
+			"value": ""
 		}
 	]
 }
