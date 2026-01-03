@@ -267,6 +267,52 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
         }
     }
 
+    /**
+     * GET /customer/me
+     * 
+     * Endpoint para verificar si las credenciales son correctas.
+     * Si el usuario está autenticado, devuelve sus datos.
+     * Si no está autenticado, el filtro @Secured devolverá 401.
+     * 
+     * Uso: GET /customer/me con header Authorization: Basic base64(user:pass)
+     * 
+     * @return JSON con los datos del usuario autenticado, o 401 si no lo está
+     */
+    @GET
+    @Path("me")
+    @Secured
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAuthenticatedCustomer(@Context jakarta.ws.rs.core.SecurityContext securityContext) {
+        
+        // Obtenemos el username del usuario autenticado (lo pone el filtro @Secured)
+        String username = securityContext.getUserPrincipal().getName();
+        
+        // Buscamos el customer con ese username
+        try {
+            Customer customer = em.createNamedQuery("Customer.findByUsername", Customer.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+            
+            // Construimos el JSON de respuesta
+            JsonObjectBuilder builder = Json.createObjectBuilder()
+                    .add("id", customer.getId())
+                    .add("username", customer.getUsername());
+            
+            if (customer.getTelefono() != null) {
+                builder.add("telefono", customer.getTelefono());
+            }
+            
+            // Devolvemos 200 OK con los datos del usuario
+            return Response.ok(builder.build()).build();
+            
+        } catch (Exception e) {
+            // Si no encontramos el customer (raro, pero por si acaso)
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"Usuario no encontrado\"}")
+                    .build();
+        }
+    }
+
     @Override
     protected EntityManager getEntityManager() {
         return em;

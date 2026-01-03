@@ -8,13 +8,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 
 /**
- * Controlador para manejar errores HTTP y páginas de error personalizadas.
+ * Controlador para mostrar páginas de error amigables.
  * 
- * RESPONSABILIDADES:
- * - Mostrar páginas de error 404, 401, 500, etc.
- * - Proporcionar mensajes de error amigables al usuario
- * 
- * ASIGNADO A: Persona B
+ * En vez de mostrar errores feos del servidor, enseñamos una página
+ * bonita explicando qué ha pasado y cómo volver a la home.
  */
 @Controller
 @Path("/error")
@@ -25,32 +22,41 @@ public class ErrorController {
 
     /**
      * GET /error?code=404&message=...
-     * Muestra una página de error personalizada.
+     * Muestra una página de error con el código y mensaje correspondientes.
      */
     @GET
     public String showError(
             @QueryParam("code") Integer errorCode,
             @QueryParam("message") String errorMessage) {
         
-        // TODO: Añadir el código de error y el mensaje al modelo
-        // models.put("errorCode", errorCode != null ? errorCode : 500);
-        // models.put("errorMessage", errorMessage != null ? errorMessage : "An unexpected error occurred");
+        // Si no nos pasan código, asumimos error 500 (error del servidor)
+        int code = (errorCode != null) ? errorCode : 500;
+        models.put("errorCode", code);
         
-        // TODO: Personalizar el mensaje según el código de error
-        // switch (errorCode) {
-        //     case 404:
-        //         models.put("errorTitle", "Resource Not Found");
-        //         break;
-        //     case 401:
-        //         models.put("errorTitle", "Unauthorized");
-        //         break;
-        //     case 500:
-        //         models.put("errorTitle", "Internal Server Error");
-        //         break;
-        //     default:
-        //         models.put("errorTitle", "Error");
-        // }
+        // Ponemos un título descriptivo según el tipo de error
+        String title;
+        switch (code) {
+            case 404:
+                title = "Pàgina no trobada";
+                break;
+            case 401:
+                title = "No autoritzat";
+                break;
+            case 403:
+                title = "Accés denegat";
+                break;
+            case 500:
+                title = "Error del servidor";
+                break;
+            default:
+                title = "Error";
+        }
+        models.put("errorTitle", title);
         
-        return "Error404.jsp";
+        // Si nos pasan un mensaje específico lo usamos, si no, uno genérico
+        String message = (errorMessage != null) ? errorMessage : "Hi ha hagut un error inesperat";
+        models.put("errorMessage", message);
+        
+        return "error.jsp";
     }
 }

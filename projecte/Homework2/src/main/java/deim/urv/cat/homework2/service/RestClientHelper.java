@@ -1,5 +1,8 @@
 package deim.urv.cat.homework2.service;
 
+import deim.urv.cat.homework2.exception.NotFoundException;
+import deim.urv.cat.homework2.exception.RestClientException;
+import deim.urv.cat.homework2.exception.UnauthorizedException;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,125 +11,167 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Clase auxiliar para realizar llamadas HTTP a la API REST de Homework1.
+ * Esta clase es nuestro "puente" para hablar con la API REST de Homework1.
+ * Tiene métodos para hacer peticiones GET y POST usando HttpURLConnection
+ * (la forma básica de Java, sin librerías externas).
  * 
- * RESPONSABILIDADES:
- * - Realizar peticiones HTTP GET, POST, PUT, DELETE
- * - Añadir headers de autenticación (Authorization)
- * - Manejar respuestas HTTP (códigos de estado, body)
- * - Lanzar excepciones personalizadas según el código HTTP
+ * Es ApplicationScoped porque solo necesitamos una instancia para toda la app.
  * 
- * NOTA: Esta clase es compartida por todos los servicios REST.
- * 
- * ASIGNADO A: Persona B (con colaboración de Persona A)
  */
 @ApplicationScoped
 public class RestClientHelper {
 
     /**
-     * Realiza una petición HTTP GET.
-     * 
-     * @param url URL del endpoint
-     * @param authHeader Header de Authorization (puede ser null)
-     * @return Cuerpo de la respuesta (JSON/XML)
-     * @throws RestClientException Si ocurre un error HTTP
+     * Hace una petición GET a la URL que le pasemos.
+     * Si todo va bien, devuelve el JSON de respuesta como String.
+     * Si hay errores, lanza excepciones según el código HTTP.
      */
-    public String get(String url, String authHeader) throws RestClientException {
+    public String get(String url, String authHeader) {
+        HttpURLConnection connection = null;
         
-        // TODO: Abrir conexión HTTP
-        // HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-        // connection.setRequestMethod("GET");
-        // connection.setRequestProperty("Accept", "application/json");
-        
-        // TODO: Añadir header de autenticación si existe
-        // if (authHeader != null) {
-        //     connection.setRequestProperty("Authorization", authHeader);
-        // }
-        
-        // TODO: Obtener código de respuesta HTTP
-        // int responseCode = connection.getResponseCode();
-        
-        // TODO: Si código es 200-299, leer el body de la respuesta
-        // if (responseCode >= 200 && responseCode < 300) {
-        //     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        //     StringBuilder response = new StringBuilder();
-        //     String line;
-        //     while ((line = in.readLine()) != null) {
-        //         response.append(line);
-        //     }
-        //     in.close();
-        //     return response.toString();
-        // }
-        
-        // TODO: Si código es 401, lanzar UnauthorizedException
-        // if (responseCode == 401) {
-        //     throw new UnauthorizedException("Authentication required");
-        // }
-        
-        // TODO: Si código es 404, lanzar NotFoundException
-        // if (responseCode == 404) {
-        //     throw new NotFoundException("Resource not found");
-        // }
-        
-        // TODO: Para otros errores, lanzar RestClientException genérica
-        // throw new RestClientException("HTTP error: " + responseCode);
-        
-        return null; // PLACEHOLDER
+        try {
+            // Abrimos la conexión con la URL de la API
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            
+            // Le decimos que queremos hacer un GET
+            connection.setRequestMethod("GET");
+            
+            // Este header le dice al servidor que esperamos JSON, no HTML ni otra cosa
+            connection.setRequestProperty("Accept", "application/json");
+            
+            // Si tenemos credenciales (el usuario ha hecho login), las añadimos
+            // Esto es necesario para acceder a rutas protegidas de la API
+            if (authHeader != null) {
+                connection.setRequestProperty("Authorization", authHeader);
+            }
+            
+            // Hacemos la petición y miramos qué código nos devuelve el servidor
+            int responseCode = connection.getResponseCode();
+            
+            // Si el código está entre 200 y 299, significa que todo ha ido bien
+            if (responseCode >= 200 && responseCode < 300) {
+                // Leemos el cuerpo de la respuesta (el JSON con los datos)
+                return readResponse(connection);
+            }
+            
+            // Si llegamos aquí es que algo ha fallado, miramos qué tipo de error es
+            handleErrorResponse(responseCode);
+            
+            // Esto nunca se ejecuta porque handleErrorResponse siempre lanza excepción
+            return null;
+            
+        } catch (RestClientException e) {
+            // Si es una de nuestras excepciones, la relanzamos tal cual
+            throw e;
+        } catch (Exception e) {
+            // Si es otro tipo de error
+            throw new RestClientException("Error al conectar con la API: " + e.getMessage(), e);
+        } finally {
+            // Siempre cerramos la conexión para liberar recursos
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
     }
 
     /**
-     * Realiza una petición HTTP POST.
-     * 
-     * @param url URL del endpoint
-     * @param jsonBody Cuerpo de la petición en formato JSON
-     * @param authHeader Header de Authorization (puede ser null)
-     * @return Cuerpo de la respuesta (JSON/XML)
-     * @throws RestClientException Si ocurre un error HTTP
+     * Hace una petición POST a la URL, enviando datos en formato JSON.
+     * Útil para crear nuevos recursos (comentarios, etc.) o para enviar datos.
      */
-    public String post(String url, String jsonBody, String authHeader) throws RestClientException {
+    public String post(String url, String jsonBody, String authHeader) {
+        HttpURLConnection connection = null;
         
-        // TODO: Abrir conexión HTTP
-        // HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-        // connection.setRequestMethod("POST");
-        // connection.setRequestProperty("Content-Type", "application/json");
-        // connection.setRequestProperty("Accept", "application/json");
-        // connection.setDoOutput(true);
-        
-        // TODO: Añadir header de autenticación si existe
-        // if (authHeader != null) {
-        //     connection.setRequestProperty("Authorization", authHeader);
-        // }
-        
-        // TODO: Escribir el body de la petición
-        // OutputStream os = connection.getOutputStream();
-        // os.write(jsonBody.getBytes("UTF-8"));
-        // os.flush();
-        // os.close();
-        
-        // TODO: Obtener código de respuesta y procesar igual que GET
-        
-        return null; // PLACEHOLDER
-    }
-
-    // TODO: Implementar métodos PUT y DELETE si son necesarios
-    
-    // ==================== EXCEPCIONES PERSONALIZADAS ====================
-
-    public static class RestClientException extends RuntimeException {
-        public RestClientException(String message) {
-            super(message);
+        try {
+            // Abrimos la conexión igual que en GET
+            connection = (HttpURLConnection) new URL(url).openConnection();
+            
+            // Pero ahora el método es POST (enviamos datos)
+            connection.setRequestMethod("POST");
+            
+            // Le decimos que vamos a enviar JSON
+            connection.setRequestProperty("Content-Type", "application/json");
+            
+            // Y que esperamos JSON de vuelta
+            connection.setRequestProperty("Accept", "application/json");
+            
+            // Esto es importante: le decimos que vamos a escribir datos en el body
+            connection.setDoOutput(true);
+            
+            // Si tenemos credenciales, las añadimos
+            if (authHeader != null) {
+                connection.setRequestProperty("Authorization", authHeader);
+            }
+            
+            // Escribimos el JSON en el cuerpo de la petición
+            if (jsonBody != null && !jsonBody.isEmpty()) {
+                try (OutputStream os = connection.getOutputStream()) {
+                    // Convertimos el String a bytes y lo enviamos
+                    os.write(jsonBody.getBytes("UTF-8"));
+                    os.flush();
+                }
+            }
+            
+            // Miramos qué nos ha respondido el servidor
+            int responseCode = connection.getResponseCode();
+            
+            // Códigos 200-299 significan éxito (200 OK, 201 Created, etc.)
+            if (responseCode >= 200 && responseCode < 300) {
+                return readResponse(connection);
+            }
+            
+            // Si hay error, lo manejamos igual que en GET
+            handleErrorResponse(responseCode);
+            
+            return null;
+            
+        } catch (RestClientException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RestClientException("Error al enviar datos a la API: " + e.getMessage(), e);
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
         }
     }
 
-    public static class UnauthorizedException extends RestClientException {
-        public UnauthorizedException(String message) {
-            super(message);
+    /**
+     * Lee el cuerpo de la respuesta HTTP línea por línea y lo devuelve como String.
+     * Es un método auxiliar para no repetir código en get() y post().
+     */
+    private String readResponse(HttpURLConnection connection) throws Exception {
+        // Usamos BufferedReader porque es más eficiente para leer texto
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+            
+            // StringBuilder para ir juntando las líneas
+            StringBuilder response = new StringBuilder();
+            String line;
+            
+            // Leemos línea por línea hasta que no haya más
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            
+            return response.toString();
         }
     }
 
-    public static class NotFoundException extends RestClientException {
-        public NotFoundException(String message) {
-            super(message);
+    /**
+     * Convierte los códigos de error HTTP en excepciones de nuestra aplicación.
+     * Así el resto del código puede hacer catch de excepciones específicas.
+     */
+    private void handleErrorResponse(int responseCode) {
+        switch (responseCode) {
+            case 401:
+                // 401 = No autorizado (credenciales incorrectas o falta login)
+                throw new UnauthorizedException("No tienes permiso para acceder. Comprueba tus credenciales.");
+            case 404:
+                // 404 = No encontrado (el recurso no existe)
+                throw new NotFoundException("El recurso que buscas no existe.");
+            default:
+                // Cualquier otro error
+                throw new RestClientException("Error de la API. Código HTTP: " + responseCode);
         }
     }
 }

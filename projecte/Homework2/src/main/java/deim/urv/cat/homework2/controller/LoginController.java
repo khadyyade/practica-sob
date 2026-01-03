@@ -13,17 +13,13 @@ import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 /**
- * Controlador para autenticación (login/logout).
+ * Controlador para gestionar el login y logout de usuarios.
  * 
- * RESPONSABILIDADES:
+ * Funcionalidades:
  * - Mostrar formulario de login
- * - Validar credenciales contra la API REST de Homework1
- * - Guardar credenciales en UserSession si login exitoso
- * - Redirigir a URL de retorno después del login
- * - Manejar logout (limpiar sesión)
- * - Mostrar errores de autenticación
- * 
- * ASIGNADO A: Persona B
+ * - Procesar las credenciales y autenticar
+ * - Redirigir al usuario a donde quería ir después del login
+ * - Cerrar sesión (logout)
  */
 @Controller
 @Path("/login")
@@ -45,14 +41,19 @@ public class LoginController {
     @GET
     public String showLoginForm() {
         
-        // TODO: Verificar si el usuario ya está autenticado
-        // if (userSession.isAuthenticated()) {
-        //     // Si ya está logueado, redirigir a la página principal
-        //     return "redirect:/";
-        // }
+        // Si el usuario ya está logueado, no tiene sentido mostrar el login
+        // Lo mandamos directamente a la página principal
+        if (userSession.isAuthenticated()) {
+            return "redirect:/";
+        }
         
-        // TODO: Añadir mensaje de error si existe (después de un intento fallido)
-        // models.put("error", userSession.getLoginError());
+        // Si hubo un error en un intento anterior, lo pasamos a la vista
+        // para que muestre el mensaje "Dades incorrectes" o similar
+        if (userSession.getLoginError() != null) {
+            models.put("error", userSession.getLoginError());
+            // Limpiamos el error para que no aparezca otra vez si recarga
+            userSession.setLoginError(null);
+        }
         
         return "login.jsp";
     }
@@ -60,59 +61,66 @@ public class LoginController {
     /**
      * POST /login
      * Procesa el formulario de login.
+     * Si las credenciales son correctas, guarda la sesión y redirige.
+     * Si son incorrectas, vuelve a mostrar el login con un error.
      */
     @POST
     public Response processLogin(
             @FormParam("username") String username,
             @FormParam("password") String password) {
         
-        // TODO: Validar que username y password no estén vacíos
-        // if (username == null || username.trim().isEmpty() ||
-        //     password == null || password.trim().isEmpty()) {
-        //     models.put("error", "Username and password are required");
-        //     return Response.ok("login.jsp").build();
-        // }
+        // Primero comprobamos que hayan rellenado los campos
+        if (username == null || username.trim().isEmpty() ||
+            password == null || password.trim().isEmpty()) {
+            models.put("error", "Has d'introduir usuari i contrasenya");
+            return Response.ok("login.jsp").build();
+        }
         
-        // TODO: Llamar a customerService.authenticate(username, password)
-        // boolean isValid = customerService.authenticate(username, password);
+        // Llamamos al servicio para verificar las credenciales contra la API
+        boolean credencialsCorrectes = customerService.authenticate(username, password);
         
-        // TODO: Si las credenciales son válidas:
-        // - Guardar username y password en userSession
-        // - userSession.setAuthenticated(true);
-        // - userSession.setUsername(username);
-        // - userSession.setPassword(password);
-        
-        // TODO: Obtener la URL de retorno guardada en la sesión
-        // String returnUrl = userSession.getReturnUrl();
-        // if (returnUrl == null || returnUrl.isEmpty()) {
-        //     returnUrl = "/";
-        // }
-        // userSession.clearReturnUrl();
-        
-        // TODO: Redirigir a la URL de retorno
-        // return Response.seeOther(URI.create(returnUrl)).build();
-        
-        // TODO: Si las credenciales NO son válidas:
-        // - Mostrar mensaje de error
-        // - Volver a renderizar login.jsp
-        // models.put("error", "Invalid username or password");
-        // return Response.ok("login.jsp").build();
-        
-        return Response.seeOther(URI.create("/")).build();
+        if (credencialsCorrectes) {
+            // ¡Login correcto! Guardamos los datos en la sesión
+            userSession.setUsername(username);
+            userSession.setPassword(password);
+            userSession.setAuthenticated(true);
+            
+            // Miramos si el usuario quería ir a alguna página antes del login
+            // (por ejemplo, si intentó ver un modelo privado sin estar logueado)
+            String returnUrl = userSession.getReturnUrl();
+            
+            // Si no hay URL guardada, lo mandamos a la home
+            if (returnUrl == null || returnUrl.isEmpty()) {
+                returnUrl = "/Homework2/";
+            }
+            
+            // Limpiamos la URL de retorno para que no se quede guardada
+            userSession.clearReturnUrl();
+            
+            // Redirigimos al usuario a donde quería ir
+            return Response.seeOther(URI.create(returnUrl)).build();
+            
+        } else {
+            // Las credenciales son incorrectas
+            // Mostramos el mensaje de error como dice el enunciado (Figura 3)
+            models.put("error", "Dades introduïdes incorrectes");
+            return Response.ok("login.jsp").build();
+        }
     }
 
     /**
-     * GET /logout
+     * GET /login/logout
      * Cierra la sesión del usuario.
+     * Borramos todos sus datos para que nadie más pueda usar su cuenta.
      */
     @GET
-    @Path("logout")
+    @Path("/logout")
     public Response logout() {
         
-        // TODO: Limpiar la sesión del usuario
-        // userSession.clearSession();
+        // Limpiamos toda la sesión del usuario
+        userSession.clearSession();
         
-        // TODO: Redirigir a la página principal
-        return Response.seeOther(URI.create("/")).build();
+        // Lo mandamos a la página principal
+        return Response.seeOther(URI.create("/Homework2/")).build();
     }
 }
