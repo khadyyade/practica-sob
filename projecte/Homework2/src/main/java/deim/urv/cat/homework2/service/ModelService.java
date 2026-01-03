@@ -1,5 +1,8 @@
 package deim.urv.cat.homework2.service;
 
+import deim.urv.cat.homework2.exception.NotFoundException;
+import deim.urv.cat.homework2.exception.RestClientException;
+import deim.urv.cat.homework2.exception.UnauthorizedException;
 import deim.urv.cat.homework2.model.ModelDTO;
 import deim.urv.cat.homework2.model.ModelListForm;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -68,11 +71,11 @@ public class ModelService {
                 
                 return models;
             }
-        } catch (RestClientHelper.NotFoundException e) {
+        } catch (NotFoundException e) {
             // Endpoint no encontrado (404) - retornar lista vacía
             System.err.println("Endpoint /models no encontrado: " + e.getMessage());
             return new ArrayList<>();
-        } catch (RestClientHelper.RestClientException e) {
+        } catch (RestClientException e) {
             // Otros errores HTTP (500, 400, etc.)
             System.err.println("Error HTTP al obtener modelos: " + e.getMessage());
             return new ArrayList<>();
@@ -99,7 +102,7 @@ public class ModelService {
      * @param modelId ID del modelo
      * @param authHeader Header de Authorization (puede ser null para modelos públicos)
      * @return Modelo o null si no existe
-     * @throws RestClientHelper.UnauthorizedException si el modelo es privado y no hay autenticación
+     * @throws UnauthorizedException si el modelo es privado y no hay autenticación
      */
     public ModelDTO getModelById(Long modelId, String authHeader) {
         try {
@@ -114,11 +117,11 @@ public class ModelService {
                 ModelDTO model = jsonb.fromJson(jsonResponse, ModelDTO.class);
                 return model;
             }
-        } catch (RestClientHelper.NotFoundException e) {
+        } catch (NotFoundException e) {
             // Modelo no encontrado (404)
             System.err.println("Modelo " + modelId + " no encontrado");
             return null;
-        } catch (RestClientHelper.UnauthorizedException e) {
+        } catch (UnauthorizedException e) {
             // Modelo privado sin autenticación (401)
             // Re-lanzar para que el controller maneje la redirección a login
             System.err.println("Modelo " + modelId + " requiere autenticación");
@@ -149,7 +152,7 @@ public class ModelService {
      * @param modelId ID del modelo
      * @param authHeader Header de Authorization (HTTP Basic) - OBLIGATORIO
      * @return Modelo con información completa (licencias, provider, etc.)
-     * @throws RestClientHelper.UnauthorizedException si no está autenticado
+     * @throws UnauthorizedException si no está autenticado
      */
     public ModelDTO getPrivateModelDetails(Long modelId, String authHeader) {
         // Este método es igual que getModelById() pero SIEMPRE con autenticación

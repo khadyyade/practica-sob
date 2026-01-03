@@ -18,10 +18,14 @@ import java.net.URI;
  * Controlador para mostrar el detalle de un modelo de IA.
  * 
  * Según el enunciado:
- * - Cualquiera puede ver los modelos públicos
- * - Solo los usuarios autenticados pueden ver los modelos privados
- * - Si intentas ver un modelo privado sin login, te manda al formulario
+ * - Cualquiera puede ver los modelos públicos (info básica)
+ * - Los usuarios autenticados ven información adicional (versión, fecha actualización)
+ * - Si un modelo es privado y no estás logueado, te redirige al login
  *   y después del login te devuelve automáticamente al modelo
+ * 
+ * NOTA: Este controlador combina la funcionalidad de vista pública y privada
+ * en un solo endpoint. La vista (detall.jsp) decide qué mostrar según
+ * si el usuario está autenticado o no.
  */
 @Controller
 @Path("/model")
@@ -40,85 +44,76 @@ public class ModelDetailController {
      * GET /model/{id}
      * Muestra el detalle de un modelo.
      * 
-     * Si el modelo es privado y el usuario no está logueado,
-     * lo redirigimos al login guardando la URL actual.
+     * - Si el usuario está autenticado: pasa sus credenciales a la API
+     *   y puede ver información privada (versión, fechas)
+     * - Si no está autenticado: solo ve información pública
+     * - Si el modelo es privado y no está autenticado: redirige al login
      */
     @GET
     @Path("{id}")
     public Response showDetail(@PathParam("id") Long modelId) {
         
         try {
-            // Obtener el modelo por ID (sin autenticación, solo información pública)
-            // Pasamos null como authHeader para obtener solo la información pública
-            ModelDTO model = modelService.getModelById(modelId, null);
+            // Preparamos el header de autenticación
+            // Si el usuario está logueado, pasamos sus credenciales
+            // Si no, pasamos null (la API devolverá solo info pública)
+            String authHeader = userSession.isAuthenticated() 
+                    ? userSession.getAuthHeader() 
+                    : null;
             
-            // Manejar caso de modelo no encontrado
+            // Llamamos al servicio para obtener el modelo
+            ModelDTO model = modelService.getModelById(modelId, authHeader);
+            
+            // Si el modelo no existe, mostramos error 404
             if (model == null) {
-                models.put("errorCode", "404");
-                models.put("errorMessage", "El modelo solicitado no existe");
-                return "Error404.jsp";
+                models.put("errorCode", 404);
+                models.put("errorTitle", "Model no trobat");
+                models.put("errorMessage", "El model que busques no existeix");
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("error.jsp")
+                        .build();
             }
             
-            // Añadir el modelo al contexto MVC para la vista
+            // Pasamos el modelo a la vista JSP
             models.put("model", model);
             
-            // Indicar que es vista pública (útil para la JSP)
-            models.put("isPublicView", true);
+            // Pasamos el estado de autenticación para que la vista sepa
+            // si mostrar la sección privada o no
+            models.put("authenticated", userSession.isAuthenticated());
+            
+            // Si está autenticado, pasamos el nombre para "Benvingut X!"
+            if (userSession.isAuthenticated()) {
+                models.put("username", userSession.getUsername());
+            }
+            
+            // Devolvemos la vista de detalle
+            return Response.ok("detall.jsp").build();
+            
+        } catch (UnauthorizedException e) {
+            // La API ha devuelto 401: el modelo es privado y no estamos autenticados
+            // Guardamos la URL actual para redirigir después del login
+            userSession.setReturnUrl("/Homework2/model/" + modelId);
+            
+            // Redirigimos al formulario de login
+            return Response.seeOther(URI.create("/Homework2/login")).build();
+            
+        } catch (NotFoundException e) {
+            // El modelo no existe (404 de la API)
+            models.put("errorCode", 404);
+            models.put("errorTitle", "Model no trobat");
+            models.put("errorMessage", "El model amb ID " + modelId + " no existeix");
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("error.jsp")
+                    .build();
             
         } catch (Exception e) {
-            // En caso de error del servidor o de red
-            models.put("errorCode", "500");
-            models.put("errorMessage", "Error al cargar el modelo: " + e.getMessage());
-            return "Error404.jsp";
+            // Cualquier otro error (red, servidor, etc.)
+            models.put("errorCode", 500);
+            models.put("errorTitle", "Error del servidor");
+            models.put("errorMessage", "Hi ha hagut un problema: " + e.getMessage());
+            return Response.serverError()
+                    .entity("error.jsp")
+                    .build();
         }
-        
-        // Retornar la vista pública del modelo
-        return "modelDetail.jsp";
     }
-
-    /**
-     * GET /model/{id}/private
-     * Vista privada del modelo (requiere autenticación).
-     * Si el usuario no está autenticado, redirige a /login.
-     */
-    @GET
-    @Path("{id}/private")
-    public Response showPrivateDetail(@PathParam("id") Long modelId) {
-        
-        // TODO: Verificar si el usuario está autenticado
-        // if (!userSession.isAuthenticated()) {
-        //     // Guardar URL de retorno en la sesión
-        //     userSession.setReturnUrl("/model/" + modelId + "/private");
-        //     // Redirigir a login
-        //     return Response.seeOther(URI.create("/login")).build();
-        // }
-        
-        // TODO: Llamar a modelService.getPrivateModelDetails(modelId, userSession.getAuthHeader())
-        // para obtener información completa (incluyendo licencias, provider, etc.)
-        
-        // TODO: Llamar a commentService.getComments(modelId, userSession.getAuthHeader())
-        // para obtener los comentarios del modelo
-        
-        // TODO: Añadir modelo y comentarios al contexto MVC
-        // models.put("model", model);
-        // models.put("comments", comments);
-        
-        // TODO: Manejar errores HTTP (401 Unauthorized, 404 Not Found, 500 Server Error)
-        
-        // TODO: Retornar la vista privada
-        // return Response.ok("privateDetail.jsp").build();
-        
-        return Response.ok("privateDetail.jsp").build();
-    }
-
-    /**
-     * POST /model/{id}/comment (opcional)
-     * Permite añadir un comentario al modelo (requiere autenticación).
-     */
-    // @POST
-    // @Path("{id}/comment")
-    // public Response addComment(@PathParam("id") Long modelId, @FormParam("text") String commentText) {
-    //     TODO: Implementar si el enunciado lo requiere
-    //     return Response.seeOther(URI.create("/model/" + modelId + "/private")).build();
-    // }
 }
