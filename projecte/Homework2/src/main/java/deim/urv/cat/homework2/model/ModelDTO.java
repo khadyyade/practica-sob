@@ -25,7 +25,6 @@ import java.util.List;
  * - lastUpdateDate (Date)
  * - version (String)
  * 
- * ASIGNADO A: Persona A
  */
 public class ModelDTO implements Serializable {
 
@@ -156,7 +155,6 @@ public class ModelDTO implements Serializable {
         
         private Long id;
         private String name;
-        private String country;
 
         public ProviderDTO() {}
 
@@ -175,14 +173,6 @@ public class ModelDTO implements Serializable {
         public void setName(String name) {
             this.name = name;
         }
-
-        public String getCountry() {
-            return country;
-        }
-
-        public void setCountry(String country) {
-            this.country = country;
-        }
     }
 
     /**
@@ -193,7 +183,6 @@ public class ModelDTO implements Serializable {
         
         private Long id;
         private String name;
-        private String description;
 
         public LicenseDTO() {}
 
@@ -211,14 +200,6 @@ public class ModelDTO implements Serializable {
 
         public void setName(String name) {
             this.name = name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
         }
     }
 

@@ -20,7 +20,6 @@ import java.util.List;
  * 
  * NOTA: La API NO soporta filtro por precio (maxPrice), solo capabilities y provider.
  * 
- * ASIGNADO A: Persona A
  */
 @Named
 @RequestScoped

@@ -4,6 +4,10 @@ import deim.urv.cat.homework2.model.ModelDTO;
 import deim.urv.cat.homework2.model.ModelListForm;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,36 +43,49 @@ public class ModelService {
      * @return Lista de modelos
      */
     public List<ModelDTO> getModels(ModelListForm filters) {
-        
-        // TODO: Construir la URL con query parameters
-        // String url = API_BASE_URL + "/models";
-        // if (filters != null && filters.hasFilters()) {
-        //     url += "?" + filters.toQueryString();
-        // }
-        
-        // TODO: Hacer llamada HTTP GET usando restClient
-        // String jsonResponse = restClient.get(url, null); // Sin autenticación
-        
-        // TODO: Parsear la respuesta JSON a List<ModelDTO>
-        // Usar Jakarta JSON-B (json-b-api está en Jakarta EE)
-        // try (Jsonb jsonb = JsonbBuilder.create()) {
-        //     Type listType = new TypeToken<List<ModelDTO>>(){}.getType();
-        //     List<ModelDTO> models = jsonb.fromJson(jsonResponse, listType);
-        //     return models;
-        // }
-        
-        // TODO: Manejar excepciones (IOException, HTTP errors)
-        // try {
-        //     ...
-        // } catch (RestClientHelper.NotFoundException e) {
-        //     return new ArrayList<>();
-        // } catch (Exception e) {
-        //     // Log del error
-        //     System.err.println("Error al obtener modelos: " + e.getMessage());
-        //     return new ArrayList<>();
-        // }
-        
-        return null; // PLACEHOLDER
+        try {
+            // Construir la URL con query parameters
+            String url = API_BASE_URL + "/models";
+            if (filters != null && filters.hasFilters()) {
+                url += "?" + filters.toQueryString();
+            }
+            
+            // Hacer llamada HTTP GET usando restClient (sin autenticación para listado)
+            String jsonResponse = restClient.get(url, null);
+            
+            // Parsear la respuesta JSON a List<ModelDTO>
+            try (Jsonb jsonb = JsonbBuilder.create()) {
+                // Jakarta JSON-B puede deserializar arrays directamente
+                ModelDTO[] modelsArray = jsonb.fromJson(jsonResponse, ModelDTO[].class);
+                
+                // Convertir array a List
+                List<ModelDTO> models = new ArrayList<>();
+                if (modelsArray != null) {
+                    for (ModelDTO model : modelsArray) {
+                        models.add(model);
+                    }
+                }
+                
+                return models;
+            }
+        } catch (RestClientHelper.NotFoundException e) {
+            // Endpoint no encontrado (404) - retornar lista vacía
+            System.err.println("Endpoint /models no encontrado: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (RestClientHelper.RestClientException e) {
+            // Otros errores HTTP (500, 400, etc.)
+            System.err.println("Error HTTP al obtener modelos: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (JsonbException e) {
+            // Error al parsear JSON
+            System.err.println("Error al parsear JSON de modelos: " + e.getMessage());
+            return new ArrayList<>();
+        } catch (Exception e) {
+            // Cualquier otro error (red, timeout, etc.)
+            System.err.println("Error inesperado al obtener modelos: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     /**
@@ -82,33 +99,40 @@ public class ModelService {
      * @param modelId ID del modelo
      * @param authHeader Header de Authorization (puede ser null para modelos públicos)
      * @return Modelo o null si no existe
+     * @throws RestClientHelper.UnauthorizedException si el modelo es privado y no hay autenticación
      */
     public ModelDTO getModelById(Long modelId, String authHeader) {
-        
-        // TODO: Construir la URL del endpoint
-        // String url = API_BASE_URL + "/models/" + modelId;
-        
-        // TODO: Hacer llamada HTTP GET (con o sin auth según si authHeader es null)
-        // try {
-        //     String jsonResponse = restClient.get(url, authHeader);
-        //     
-        //     // Parsear JSON a ModelDTO
-        //     try (Jsonb jsonb = JsonbBuilder.create()) {
-        //         ModelDTO model = jsonb.fromJson(jsonResponse, ModelDTO.class);
-        //         return model;
-        //     }
-        // } catch (RestClientHelper.NotFoundException e) {
-        //     // Modelo no encontrado (404)
-        //     return null;
-        // } catch (RestClientHelper.UnauthorizedException e) {
-        //     // Modelo privado sin autenticación (401)
-        //     throw e; // Re-lanzar para que el controller maneje la redirección a login
-        // } catch (Exception e) {
-        //     System.err.println("Error al obtener modelo " + modelId + ": " + e.getMessage());
-        //     return null;
-        // }
-        
-        return null; // PLACEHOLDER
+        try {
+            // Construir la URL del endpoint
+            String url = API_BASE_URL + "/models/" + modelId;
+            
+            // Hacer llamada HTTP GET (con o sin auth según si authHeader es null)
+            String jsonResponse = restClient.get(url, authHeader);
+            
+            // Parsear JSON a ModelDTO
+            try (Jsonb jsonb = JsonbBuilder.create()) {
+                ModelDTO model = jsonb.fromJson(jsonResponse, ModelDTO.class);
+                return model;
+            }
+        } catch (RestClientHelper.NotFoundException e) {
+            // Modelo no encontrado (404)
+            System.err.println("Modelo " + modelId + " no encontrado");
+            return null;
+        } catch (RestClientHelper.UnauthorizedException e) {
+            // Modelo privado sin autenticación (401)
+            // Re-lanzar para que el controller maneje la redirección a login
+            System.err.println("Modelo " + modelId + " requiere autenticación");
+            throw e;
+        } catch (JsonbException e) {
+            // Error al parsear JSON
+            System.err.println("Error al parsear JSON del modelo " + modelId + ": " + e.getMessage());
+            return null;
+        } catch (Exception e) {
+            // Cualquier otro error
+            System.err.println("Error al obtener modelo " + modelId + ": " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -125,47 +149,60 @@ public class ModelService {
      * @param modelId ID del modelo
      * @param authHeader Header de Authorization (HTTP Basic) - OBLIGATORIO
      * @return Modelo con información completa (licencias, provider, etc.)
+     * @throws RestClientHelper.UnauthorizedException si no está autenticado
      */
     public ModelDTO getPrivateModelDetails(Long modelId, String authHeader) {
-        
-        // TODO: Este método es igual que getModelById() pero SIEMPRE con autenticación
-        // Se puede simplificar llamando a getModelById(modelId, authHeader)
-        // return getModelById(modelId, authHeader);
-        
-        // O bien, implementar directamente:
-        // String url = API_BASE_URL + "/models/" + modelId;
-        // 
-        // try {
-        //     String jsonResponse = restClient.get(url, authHeader);
-        //     
-        //     try (Jsonb jsonb = JsonbBuilder.create()) {
-        //         ModelDTO model = jsonb.fromJson(jsonResponse, ModelDTO.class);
-        //         return model;
-        //     }
-        // } catch (RestClientHelper.UnauthorizedException e) {
-        //     // Usuario no autenticado o sin permisos (401)
-        //     throw e; // Controller redirigirá a login
-        // } catch (RestClientHelper.NotFoundException e) {
-        //     // Modelo no encontrado (404)
-        //     return null;
-        // } catch (Exception e) {
-        //     System.err.println("Error al obtener modelo privado " + modelId + ": " + e.getMessage());
-        //     return null;
-        // }
-        
-        return null; // PLACEHOLDER
+        // Este método es igual que getModelById() pero SIEMPRE con autenticación
+        // Simplemente delegar la llamada
+        return getModelById(modelId, authHeader);
     }
 
     // ==================== MÉTODOS AUXILIARES ====================
 
-    // TODO: Implementar método para parsear JSON a List<ModelDTO>
-    // private List<ModelDTO> parseJsonToModelList(String json) {
-    //     // Usar biblioteca de JSON (Jackson, Gson, Jakarta JSON-B)
-    //     return null;
-    // }
+    /**
+     * Parsea una respuesta JSON a un objeto ModelDTO.
+     * 
+     * @param json String JSON de la respuesta
+     * @return ModelDTO o null si hay error
+     */
+    private ModelDTO parseJsonToModel(String json) {
+        if (json == null || json.trim().isEmpty()) {
+            return null;
+        }
+        
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.fromJson(json, ModelDTO.class);
+        } catch (Exception e) {
+            System.err.println("Error al parsear JSON a ModelDTO: " + e.getMessage());
+            return null;
+        }
+    }
 
-    // TODO: Implementar método para parsear JSON a ModelDTO
-    // private ModelDTO parseJsonToModel(String json) {
-    //     return null;
-    // }
+    /**
+     * Parsea una respuesta JSON a una lista de ModelDTO.
+     * 
+     * @param json String JSON de la respuesta (array)
+     * @return Lista de ModelDTO o lista vacía si hay error
+     */
+    private List<ModelDTO> parseJsonToModelList(String json) {
+        if (json == null || json.trim().isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            ModelDTO[] modelsArray = jsonb.fromJson(json, ModelDTO[].class);
+            
+            List<ModelDTO> models = new ArrayList<>();
+            if (modelsArray != null) {
+                for (ModelDTO model : modelsArray) {
+                    models.add(model);
+                }
+            }
+            
+            return models;
+        } catch (Exception e) {
+            System.err.println("Error al parsear JSON a List<ModelDTO>: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
 }
