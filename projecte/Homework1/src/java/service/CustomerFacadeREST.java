@@ -282,10 +282,20 @@ public class CustomerFacadeREST extends AbstractFacade<Customer> {
     @Path("me")
     @Secured
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAuthenticatedCustomer(@Context jakarta.ws.rs.core.SecurityContext securityContext) {
+    public Response getAuthenticatedCustomer(@HeaderParam("Authorization") String authHeader) {
         
-        // Obtenemos el username del usuario autenticado (lo pone el filtro @Secured)
-        String username = securityContext.getUserPrincipal().getName();
+        // Extraemos el username del header Authorization (Basic base64(user:pass))
+        // Si llegamos aquí, @Secured ya ha validado que las credenciales son correctas
+        String username;
+        try {
+            String base64Credentials = authHeader.replace("Basic ", "");
+            String decoded = new String(java.util.Base64.getDecoder().decode(base64Credentials));
+            username = decoded.split(":")[0];
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Header Authorization inválido\"}")
+                    .build();
+        }
         
         // Buscamos el customer con ese username
         try {

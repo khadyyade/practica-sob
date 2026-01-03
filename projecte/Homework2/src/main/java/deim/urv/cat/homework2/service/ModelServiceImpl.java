@@ -42,6 +42,7 @@ public class ModelServiceImpl implements ModelService {
      */
     @Override
     public List<ModelDTO> getModels(ModelListForm filters) {
+        System.out.println("========== ModelServiceImpl.getModels() EJECUTADO ==========");
         try {
             // Construir la URL con query parameters
             String url = API_BASE_URL + "/models";
@@ -49,8 +50,12 @@ public class ModelServiceImpl implements ModelService {
                 url += "?" + filters.toQueryString();
             }
             
+            System.out.println("URL de la API: " + url);
+            
             // Hacer llamada HTTP GET usando restClient (sin autenticación para listado)
             String jsonResponse = restClient.get(url, null);
+            
+            System.out.println("Respuesta JSON recibida: " + (jsonResponse != null ? jsonResponse.substring(0, Math.min(200, jsonResponse.length())) + "..." : "null"));
             
             // Parsear la respuesta JSON a List<ModelDTO>
             try (Jsonb jsonb = JsonbBuilder.create()) {
@@ -65,6 +70,7 @@ public class ModelServiceImpl implements ModelService {
                     }
                 }
                 
+                System.out.println("Modelos parseados: " + models.size());
                 return models;
             }
         } catch (NotFoundException e) {

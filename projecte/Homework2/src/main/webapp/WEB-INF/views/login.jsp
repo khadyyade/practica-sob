@@ -35,7 +35,7 @@
         - action: usamos c:url para que la ruta funcione bien (añade el contexto de la app)
         - method="POST": enviamos los datos de forma segura (no en la URL)
     --%>
-    <form action="<c:url value='/login'/>" method="POST">
+    <form action="<c:url value='/Web/login'/>" method="POST">
         
         <%-- Campo para el nombre de usuario --%>
         <p>
@@ -64,7 +64,7 @@
         Enlace para volver al listado principal sin hacer login.
     --%>
     <p>
-        <a href="<c:url value='/'/>">Tornar al llistat de models</a>
+        <a href="<c:url value='/Web/'/>">Tornar al llistat de models</a>
     </p>
     
 </body>

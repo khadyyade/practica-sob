@@ -47,7 +47,7 @@
         Usamos c:url para que la ruta funcione correctamente.
     --%>
     <p>
-        <a href="<c:url value='/'/>">
+        <a href="<c:url value='/Web/'/>">
             <b>Tornar a l'inici</b>
         </a>
     </p>

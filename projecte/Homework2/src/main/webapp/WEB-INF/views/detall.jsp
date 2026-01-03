@@ -33,16 +33,16 @@
             <%-- Si el usuario está autenticado, mostramos bienvenida y logout --%>
             <c:when test="${authenticated}">
                 <b>Benvingut ${username}!</b> | 
-                <a href="<c:url value='/login/logout'/>">Tancar sessió</a>
+                <a href="<c:url value='/Web/login/logout'/>">Tancar sessió</a>
             </c:when>
             <%-- Si no está autenticado, mostramos enlace al login --%>
             <c:otherwise>
-                <a href="<c:url value='/login'/>">Iniciar sessió</a>
+                <a href="<c:url value='/Web/login'/>">Iniciar sessió</a>
             </c:otherwise>
         </c:choose>
         
         <%-- Enlace para volver al listado --%>
-        | <a href="<c:url value='/'/>">Tornar al llistat</a>
+        | <a href="<c:url value='/Web/'/>">Tornar al llistat</a>
     </div>
     
     <hr>
@@ -146,7 +146,7 @@
         <hr>
         <p>
             <i>Inicia sessió per veure informació addicional del model.</i>
-            <a href="<c:url value='/login'/>">Identificar-se</a>
+            <a href="<c:url value='/Web/login'/>">Identificar-se</a>
         </p>
     </c:if>
 

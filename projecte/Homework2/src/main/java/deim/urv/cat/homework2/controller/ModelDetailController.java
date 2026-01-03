@@ -92,10 +92,10 @@ public class ModelDetailController {
         } catch (UnauthorizedException e) {
             // La API ha devuelto 401: el modelo es privado y no estamos autenticados
             // Guardamos la URL actual para redirigir después del login
-            userSession.setReturnUrl("/Homework2/model/" + modelId);
+            userSession.setReturnUrl("/Homework2/Web/model/" + modelId);
             
             // Redirigimos al formulario de login
-            return Response.seeOther(URI.create("/Homework2/login")).build();
+            return Response.seeOther(URI.create("/Homework2/Web/login")).build();
             
         } catch (NotFoundException e) {
             // El modelo no existe (404 de la API)

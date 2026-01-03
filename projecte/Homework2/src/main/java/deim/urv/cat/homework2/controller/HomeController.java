@@ -48,6 +48,10 @@ public class HomeController {
             @QueryParam("capability") List<String> capabilities,
             @QueryParam("provider") String provider) {
         
+        System.out.println("========== HomeController.showHomePage() EJECUTADO ==========");
+        System.out.println("Capabilities recibidas: " + capabilities);
+        System.out.println("Provider recibido: " + provider);
+        
         // Actualizar el formulario de filtros con los parámetros recibidos
         if (capabilities != null && !capabilities.isEmpty()) {
             filterForm.setCapabilities(capabilities);
@@ -58,7 +62,9 @@ public class HomeController {
         
         // Llamar a modelService.getModels(filterForm) para obtener la lista filtrada
         try {
+            System.out.println("Llamando a modelService.getModels()...");
             List<ModelDTO> modelList = modelService.getModels(filterForm);
+            System.out.println("Modelos obtenidos: " + (modelList != null ? modelList.size() : "null"));
             
             // Añadir la lista de modelos al modelo MVC
             models.put("models", modelList);
@@ -67,12 +73,15 @@ public class HomeController {
             models.put("filters", filterForm);
             
         } catch (Exception e) {
+            System.err.println("ERROR en HomeController: " + e.getMessage());
+            e.printStackTrace();
             // Si falla, mostrar mensaje de error y lista vacía
             models.put("error", "Error al cargar los modelos: " + e.getMessage());
             models.put("models", new ArrayList<>());
             models.put("filters", filterForm);
         }
         
+        System.out.println("Retornando vista index.jsp");
         // Retornar la vista JSP correspondiente
         return "index.jsp";
     }

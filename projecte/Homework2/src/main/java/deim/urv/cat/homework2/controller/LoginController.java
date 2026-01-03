@@ -44,7 +44,7 @@ public class LoginController {
         // Si el usuario ya está logueado, no tiene sentido mostrar el login
         // Lo mandamos directamente a la página principal
         if (userSession.isAuthenticated()) {
-            return "redirect:/";
+            return "redirect:/Web/";
         }
         
         // Si hubo un error en un intento anterior, lo pasamos a la vista
@@ -91,7 +91,7 @@ public class LoginController {
             
             // Si no hay URL guardada, lo mandamos a la home
             if (returnUrl == null || returnUrl.isEmpty()) {
-                returnUrl = "/Homework2/";
+                returnUrl = "/Homework2/Web/";
             }
             
             // Limpiamos la URL de retorno para que no se quede guardada
@@ -121,6 +121,6 @@ public class LoginController {
         userSession.clearSession();
         
         // Lo mandamos a la página principal
-        return Response.seeOther(URI.create("/Homework2/")).build();
+        return Response.seeOther(URI.create("/Homework2/Web/")).build();
     }
 }

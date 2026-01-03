@@ -92,8 +92,17 @@ public class ModelDTO implements Serializable {
     public boolean isPrivate() {
         return isPrivate;
     }
+    
+    // Getter alternativo para EL/JSP que busca getIsPrivate()
+    public boolean getIsPrivate() {
+        return isPrivate;
+    }
 
     public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+    
+    public void setIsPrivate(boolean isPrivate) {
         this.isPrivate = isPrivate;
     }
 
