@@ -47,19 +47,32 @@ public class ModelDetailController {
     @Path("{id}")
     public String showPublicDetail(@PathParam("id") Long modelId) {
         
-        // TODO: Llamar a modelService.getModelById(modelId) para obtener el modelo
-        // ModelDTO model = modelService.getModelById(modelId);
+        try {
+            // Obtener el modelo por ID (sin autenticación, solo información pública)
+            // Pasamos null como authHeader para obtener solo la información pública
+            ModelDTO model = modelService.getModelById(modelId, null);
+            
+            // Manejar caso de modelo no encontrado
+            if (model == null) {
+                models.put("errorCode", "404");
+                models.put("errorMessage", "El modelo solicitado no existe");
+                return "Error404.jsp";
+            }
+            
+            // Añadir el modelo al contexto MVC para la vista
+            models.put("model", model);
+            
+            // Indicar que es vista pública (útil para la JSP)
+            models.put("isPublicView", true);
+            
+        } catch (Exception e) {
+            // En caso de error del servidor o de red
+            models.put("errorCode", "500");
+            models.put("errorMessage", "Error al cargar el modelo: " + e.getMessage());
+            return "Error404.jsp";
+        }
         
-        // TODO: Manejar caso de modelo no encontrado (404)
-        // if (model == null) {
-        //     models.put("error", "Model not found");
-        //     return "error.jsp";
-        // }
-        
-        // TODO: Añadir el modelo al contexto MVC
-        // models.put("model", model);
-        
-        // TODO: Retornar la vista pública
+        // Retornar la vista pública del modelo
         return "modelDetail.jsp";
     }
 

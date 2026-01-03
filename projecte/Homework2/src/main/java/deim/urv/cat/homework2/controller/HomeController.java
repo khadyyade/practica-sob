@@ -48,31 +48,32 @@ public class HomeController {
             @QueryParam("capability") List<String> capabilities,
             @QueryParam("provider") String provider) {
         
-        // TODO: Actualizar el formulario de filtros con los parámetros recibidos
-        // if (capabilities != null && !capabilities.isEmpty()) {
-        //     filterForm.setCapabilities(capabilities);
-        // }
-        // if (provider != null && !provider.trim().isEmpty()) {
-        //     filterForm.setProvider(provider);
-        // }
+        // Actualizar el formulario de filtros con los parámetros recibidos
+        if (capabilities != null && !capabilities.isEmpty()) {
+            filterForm.setCapabilities(capabilities);
+        }
+        if (provider != null && !provider.trim().isEmpty()) {
+            filterForm.setProvider(provider);
+        }
         
-        // TODO: Llamar a modelService.getModels(filterForm) para obtener la lista filtrada
-        // try {
-        //     List<ModelDTO> modelList = modelService.getModels(filterForm);
-        //     
-        //     // Añadir la lista de modelos al modelo MVC
-        //     models.put("models", modelList);
-        //     
-        //     // Añadir el formulario de filtros al modelo para pre-rellenar el formulario
-        //     models.put("filters", filterForm);
-        //     
-        // } catch (Exception e) {
-        //     // Si falla, mostrar mensaje de error y lista vacía
-        //     models.put("error", "Error al cargar los modelos: " + e.getMessage());
-        //     models.put("models", new ArrayList<>());
-        // }
+        // Llamar a modelService.getModels(filterForm) para obtener la lista filtrada
+        try {
+            List<ModelDTO> modelList = modelService.getModels(filterForm);
+            
+            // Añadir la lista de modelos al modelo MVC
+            models.put("models", modelList);
+            
+            // Añadir el formulario de filtros al modelo para pre-rellenar el formulario
+            models.put("filters", filterForm);
+            
+        } catch (Exception e) {
+            // Si falla, mostrar mensaje de error y lista vacía
+            models.put("error", "Error al cargar los modelos: " + e.getMessage());
+            models.put("models", new ArrayList<>());
+            models.put("filters", filterForm);
+        }
         
-        // TODO: Retornar la vista JSP correspondiente
+        // Retornar la vista JSP correspondiente
         return "index.jsp";
     }
 

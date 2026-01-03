@@ -54,26 +54,26 @@
 │                HOMEWORK2 (Jakarta MVC 2.0)                      │
 │                                                                 │
 │  ┌───────────────────────────────────────────────────────────┐  │
-│  │ CAPA: CONTROLLERS (Navegación y Lógica de Presentación) │  │
-│  │ - HomeController: Listado de modelos                     │  │
-│  │ - ModelDetailController: Detalle público/privado         │  │
-│  │ - LoginController: Autenticación                         │  │
-│  │ - ErrorController: Manejo de errores                     │  │
+│  │ CAPA: CONTROLLERS (Navegación y Lógica de Presentación)   │  │
+│  │ - HomeController: Listado de modelos                      │  │
+│  │ - ModelDetailController: Detalle público/privado          │  │
+│  │ - LoginController: Autenticación                          │  │
+│  │ - ErrorController: Manejo de errores                      │  │
 │  └───────────────┬───────────────────────────────────────────┘  │
-│                  │                                               │
+│                  │                                              │
 │  ┌───────────────▼───────────────────────────────────────────┐  │
-│  │ CAPA: MODEL (Estado de la Aplicación - CDI Beans)       │  │
-│  │ - UserSession: Sesión autenticada (@SessionScoped)       │  │
-│  │ - ModelListForm: Filtros de búsqueda (@RequestScoped)   │  │
-│  │ - DTOs: ModelDTO, CommentDTO, CustomerDTO (POJOs)       │  │
+│  │ CAPA: MODEL (Estado de la Aplicación - CDI Beans)         │  │
+│  │ - UserSession: Sesión autenticada (@SessionScoped)        │  │
+│  │ - ModelListForm: Filtros de búsqueda (@RequestScoped)     │  │
+│  │ - DTOs: ModelDTO, CommentDTO, CustomerDTO (POJOs)         │  │
 │  └───────────────┬───────────────────────────────────────────┘  │
-│                  │                                               │
+│                  │                                              │
 │  ┌───────────────▼───────────────────────────────────────────┐  │
-│  │ CAPA: SERVICE (Clientes REST - @ApplicationScoped)      │  │
-│  │ - ModelService: GET /models, /models/{id}                │  │
-│  │ - CommentService: GET /comments, POST /comments          │  │
-│  │ - CustomerService: Autenticación HTTP Basic              │  │
-│  │ - RestClientHelper: HttpURLConnection, Authorization     │  │
+│  │ CAPA: SERVICE (Clientes REST - @ApplicationScoped)        │  │
+│  │ - ModelService: GET /models, /models/{id}                 │  │
+│  │ - CommentService: GET /comments, POST /comments           │  │
+│  │ - CustomerService: Autenticación HTTP Basic               │  │
+│  │ - RestClientHelper: HttpURLConnection, Authorization      │  │
 │  └───────────────┬───────────────────────────────────────────┘  │
 └──────────────────┼─────────────────────────────────────────────┘
                    │ HTTP REST API Calls (JSON/XML)
@@ -504,28 +504,27 @@ public String showHomePage() {
 ### 7.1 Persona A - Modelos
 
 #### Fase 1: Setup
-- [ ] Completar atributos de `ModelDTO` según la API REST de Homework1
-- [ ] Completar atributos de `CommentDTO`
-- [ ] Implementar `ModelListForm.toQueryString()`
+- [x] Completar atributos de `ModelDTO` según la API REST de Homework1
+- [x] Implementar `ModelListForm.toQueryString()`
 
 #### Fase 2: Service Layer
-- [ ] Implementar `ModelService.getModels()` con filtros
-- [ ] Implementar parseo JSON → `List<ModelDTO>`
-- [ ] Implementar `ModelService.getModelById()`
-- [ ] Implementar `ModelService.getPrivateModelDetails()` (con auth)
-- [ ] Manejar excepciones HTTP (404, 500)
+- [x] Implementar `ModelService.getModels()` con filtros
+- [x] Implementar parseo JSON → `List<ModelDTO>`
+- [x] Implementar `ModelService.getModelById()`
+- [x] Implementar `ModelService.getPrivateModelDetails()` (con auth)
+- [x] Manejar excepciones HTTP (404, 500)
 
 #### Fase 3: Controller Layer
-- [ ] Implementar `HomeController.showHomePage()`
-- [ ] Leer query params y actualizar `ModelListForm`
-- [ ] Pasar lista de modelos a la vista
-- [ ] Implementar `ModelDetailController.showPublicDetail()`
-- [ ] Manejar error 404 (modelo no encontrado)
+- [x] Implementar `HomeController.showHomePage()`
+- [x] Leer query params y actualizar `ModelListForm`
+- [x] Pasar lista de modelos a la vista
+- [x] Implementar `ModelDetailController.showPublicDetail()`
+- [x] Manejar error 404 (modelo no encontrado)
 
 #### Fase 4: Vistas
-- [ ] Crear `index.jsp` con listado de modelos
-- [ ] Añadir formulario de filtros
-- [ ] Crear `modelDetail.jsp` con información pública
+- [x] Crear `index.jsp` con listado de modelos
+- [x] Añadir formulario de filtros
+- [x] Crear `modelDetail.jsp` con información pública
 
 ---
 
