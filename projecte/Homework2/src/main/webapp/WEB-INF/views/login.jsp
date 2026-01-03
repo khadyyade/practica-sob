@@ -1,71 +1,55 @@
 <%-- 
     login.jsp - Página de login (identificación de usuario)
-    
-    Esta página muestra un formulario simple para que el usuario
-    introduzca su nombre y contraseña.
-    
-    Variables que recibimos del controlador (LoginController):
-    - error: mensaje de error si las credenciales son incorrectas
 --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%-- Importamos JSTL para poder usar <c:if>, <c:url>, etc. --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <!DOCTYPE html>
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Identificació d'usuari</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 40px; background-color: #f5f5f5; }
+        .login-box {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <%-- Título principal de la página --%>
-    <h1>Identificació d'usuari</h1>
-    
-    <%-- 
-        Aquí comprobamos si el controlador nos ha mandado un error.
-        Si existe la variable "error", la mostramos en rojo para avisar al usuario.
-        Usamos <c:if> para hacer esta comprobación.
-    --%>
-    <c:if test="${not empty error}">
-        <p style="color: red;"><b>${error}</b></p>
-    </c:if>
-    
-    <%-- 
-        Formulario de login.
-        - action: usamos c:url para que la ruta funcione bien (añade el contexto de la app)
-        - method="POST": enviamos los datos de forma segura (no en la URL)
-    --%>
-    <form action="<c:url value='/Web/login'/>" method="POST">
-        
-        <%-- Campo para el nombre de usuario --%>
-        <p>
-            <label for="username"><b>Nom d'usuari:</b></label><br>
-            <%-- El input recoge lo que escribe el usuario y lo manda como "username" --%>
-            <input type="text" id="username" name="username" placeholder="Introdueix el teu usuari">
-        </p>
-        
-        <%-- Campo para la contraseña --%>
-        <p>
-            <label for="password"><b>Contrasenya:</b></label><br>
-            <%-- type="password" hace que no se vean los caracteres mientras se escribe --%>
-            <input type="password" id="password" name="password" placeholder="Introdueix la teva contrasenya">
-        </p>
-        
-        <%-- Botón para enviar el formulario --%>
-        <p>
-            <input type="submit" value="Entrar">
-        </p>
-        
-    </form>
-    
-    <hr>
-    
-    <%-- 
-        Enlace para volver al listado principal sin hacer login.
-    --%>
-    <p>
-        <a href="<c:url value='/Web/'/>">Tornar al llistat de models</a>
-    </p>
-    
+    <div class="container">
+        <div class="login-box">
+            <h2 class="text-center">Identificació d'usuari</h2>
+            <hr>
+            
+            <c:if test="${not empty error}">
+                <div class="alert alert-danger">${error}</div>
+            </c:if>
+            
+            <form action="<c:url value='/Web/login'/>" method="POST">
+                <div class="form-group">
+                    <label for="username">Nom d'usuari:</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Introdueix el teu usuari">
+                </div>
+                <div class="form-group">
+                    <label for="password">Contrasenya:</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Introdueix la teva contrasenya">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+            </form>
+            
+            <hr>
+            <p class="text-center">
+                <a href="<c:url value='/Web/'/>">Tornar al llistat de models</a>
+            </p>
+        </div>
+    </div>
 </body>
 </html>

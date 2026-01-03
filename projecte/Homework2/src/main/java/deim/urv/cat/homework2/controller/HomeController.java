@@ -2,6 +2,7 @@ package deim.urv.cat.homework2.controller;
 
 import deim.urv.cat.homework2.model.ModelListForm;
 import deim.urv.cat.homework2.model.ModelDTO;
+import deim.urv.cat.homework2.model.UserSession;
 import deim.urv.cat.homework2.service.ModelService;
 import jakarta.inject.Inject;
 import jakarta.mvc.Controller;
@@ -34,6 +35,9 @@ public class HomeController {
     
     @Inject
     private ModelListForm filterForm;
+    
+    @Inject
+    private UserSession userSession;
 
     /**
      * GET / 
@@ -80,6 +84,10 @@ public class HomeController {
             models.put("models", new ArrayList<>());
             models.put("filters", filterForm);
         }
+        
+        // Pasar información de autenticación a la vista
+        models.put("authenticated", userSession.isAuthenticated());
+        models.put("username", userSession.getUsername());
         
         System.out.println("Retornando vista index.jsp");
         // Retornar la vista JSP correspondiente

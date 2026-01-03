@@ -39,12 +39,12 @@ public class LoginController {
      * Muestra el formulario de login.
      */
     @GET
-    public String showLoginForm() {
+    public Response showLoginForm() {
         
         // Si el usuario ya está logueado, no tiene sentido mostrar el login
         // Lo mandamos directamente a la página principal
         if (userSession.isAuthenticated()) {
-            return "redirect:/Web/";
+            return Response.seeOther(URI.create("/Homework2/Web/")).build();
         }
         
         // Si hubo un error en un intento anterior, lo pasamos a la vista
@@ -55,7 +55,7 @@ public class LoginController {
             userSession.setLoginError(null);
         }
         
-        return "login.jsp";
+        return Response.ok("login.jsp").build();
     }
 
     /**

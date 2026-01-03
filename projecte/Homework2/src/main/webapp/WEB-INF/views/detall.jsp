@@ -1,154 +1,118 @@
-<%-- 
-    detall.jsp - Página de detalle de un modelo de IA
-    
-    Esta página muestra toda la información de un modelo:
-    - Datos públicos: nombre, proveedor, resumen, descripción, capacidades
-    - Datos privados (solo si estás logueado): versión y fecha de actualización
-    
-    Variables que recibimos del controlador (ModelDetailController):
-    - model: el objeto ModelDTO con todos los datos del modelo
-    - authenticated: boolean que indica si el usuario está logueado
-    - username: nombre del usuario logueado (solo si authenticated=true)
---%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%-- Importamos JSTL para usar <c:if>, <c:forEach>, <c:url> --%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%-- Importamos fmt para formatear fechas de forma bonita --%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
 <!DOCTYPE html>
 <html lang="ca">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${model.name} - Detall del model</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-
-    <%-- 
-        CABECERA: Estado de la sesión del usuario
-        Aquí mostramos si está logueado o no, y los enlaces correspondientes.
-    --%>
-    <div>
-        <c:choose>
-            <%-- Si el usuario está autenticado, mostramos bienvenida y logout --%>
-            <c:when test="${authenticated}">
-                <b>Benvingut ${username}!</b> | 
-                <a href="<c:url value='/Web/login/logout'/>">Tancar sessió</a>
-            </c:when>
-            <%-- Si no está autenticado, mostramos enlace al login --%>
-            <c:otherwise>
-                <a href="<c:url value='/Web/login'/>">Iniciar sessió</a>
-            </c:otherwise>
-        </c:choose>
-        
-        <%-- Enlace para volver al listado --%>
-        | <a href="<c:url value='/Web/'/>">Tornar al llistat</a>
-    </div>
-    
-    <hr>
-    
-    <%-- 
-        SECCIÓN PRINCIPAL: Información del modelo
-    --%>
-    
-    <%-- Título: nombre del modelo --%>
-    <h1>${model.name}</h1>
-    
-    <%-- 
-        Proveedor del modelo (empresa que lo ha creado).
-        Comprobamos que exista antes de mostrarlo para evitar errores.
-    --%>
-    <c:if test="${not empty model.provider}">
-        <p>
-            <b>Proveïdor:</b> ${model.provider.name}
-            <%-- Si tiene país, también lo mostramos --%>
-            <c:if test="${not empty model.provider.country}">
-                (${model.provider.country})
-            </c:if>
-        </p>
-    </c:if>
-    
-    <%-- Resumen corto del modelo --%>
-    <c:if test="${not empty model.summary}">
-        <p><b>Resum:</b> ${model.summary}</p>
-    </c:if>
-    
-    <%-- Descripción larga del modelo --%>
-    <c:if test="${not empty model.description}">
-        <h2>Descripció</h2>
-        <p>${model.description}</p>
-    </c:if>
-    
-    <%-- 
-        Capacidades del modelo (las 3 habilidades destacadas).
-        Usamos <c:forEach> para recorrer la lista una a una.
-    --%>
-    <c:if test="${not empty model.capabilities}">
-        <h2>Capacitats destacades</h2>
-        <ul>
-            <%-- Con forEach recorremos cada capacidad de la lista --%>
-            <c:forEach var="capability" items="${model.capabilities}">
-                <li>${capability.name}</li>
-            </c:forEach>
-        </ul>
-    </c:if>
-    
-    <%-- 
-        Licencia del modelo.
-    --%>
-    <c:if test="${not empty model.license}">
-        <p><b>Llicència:</b> ${model.license.name}</p>
-    </c:if>
-    
-    <hr>
-    
-    <%-- 
-        SECCIÓN PRIVADA: Solo visible para usuarios autenticados
-        
-        Según el enunciado (Figura 2), los usuarios logueados pueden ver
-        información extra como la versión y la fecha de última actualización.
-        Usamos <c:if> para comprobar si el usuario está autenticado.
-    --%>
-    <c:if test="${authenticated}">
-        <h2>Informació privada</h2>
-        <p><i>(Només visible per usuaris identificats)</i></p>
-        
-        <%-- Versión del modelo --%>
-        <c:if test="${not empty model.version}">
-            <p><b>Versió:</b> ${model.version}</p>
-        </c:if>
-        
-        <%-- 
-            Fecha de última actualización.
-            Usamos fmt:formatDate para que la fecha salga bonita (día/mes/año).
-        --%>
-        <c:if test="${not empty model.lastUpdateDate}">
-            <p>
-                <b>Última actualització:</b> 
-                <fmt:formatDate value="${model.lastUpdateDate}" pattern="dd/MM/yyyy"/>
-            </p>
-        </c:if>
-        
-        <%-- Fecha de entrenamiento (si existe) --%>
-        <c:if test="${not empty model.trainingDate}">
-            <p>
-                <b>Data d'entrenament:</b> 
-                <fmt:formatDate value="${model.trainingDate}" pattern="dd/MM/yyyy"/>
-            </p>
-        </c:if>
-    </c:if>
-    
-    <%-- 
-        Si el usuario NO está logueado, le avisamos de que hay más info
-        y le invitamos a identificarse.
-    --%>
-    <c:if test="${not authenticated}">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>AI Models Catalog</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <c:choose>
+                    <c:when test="${authenticated}">
+                        <b>Benvingut ${username}!</b> |
+                        <a href="${pageContext.request.contextPath}/Web/login/logout">Tancar sessio</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/Web/login">Iniciar sessio</a>
+                    </c:otherwise>
+                </c:choose>
+                | <a href="${pageContext.request.contextPath}/Web/">Tornar al llistat</a>
+            </div>
+        </div>
         <hr>
-        <p>
-            <i>Inicia sessió per veure informació addicional del model.</i>
-            <a href="<c:url value='/Web/login'/>">Identificar-se</a>
-        </p>
-    </c:if>
 
+        <!-- Contingut principal -->
+        <div class="row">
+            <!-- col-xs-12: mobil 1 columna, col-sm-8: escriptori columna principal -->
+            <div class="col-xs-12 col-sm-8">
+                <h2>${model.name}</h2>
+                
+                <c:if test="${not empty model.provider}">
+                    <p><b>Proveidor:</b> ${model.provider.name}</p>
+                </c:if>
+                
+                <c:if test="${not empty model.summary}">
+                    <p><b>Resum:</b> ${model.summary}</p>
+                </c:if>
+                
+                <c:if test="${not empty model.description}">
+                    <h3>Descripcio</h3>
+                    <p>${model.description}</p>
+                </c:if>
+                
+                <c:if test="${not empty model.capabilities}">
+                    <h3>Capacitats destacades</h3>
+                    <ul>
+                        <c:forEach var="capability" items="${model.capabilities}">
+                            <li>${capability.name}</li>
+                        </c:forEach>
+                    </ul>
+                </c:if>
+                
+                <c:if test="${not empty model.license}">
+                    <p><b>Llicencia:</b> ${model.license.name}</p>
+                </c:if>
+            </div>
+
+            <!-- col-xs-12: mobil 1 columna (sota), col-sm-4: escriptori columna lateral -->
+            <div class="col-xs-12 col-sm-4">
+                <c:choose>
+                    <c:when test="${authenticated}">
+                        <div class="panel panel-info">
+                            <div class="panel-heading">
+                                <h4>Informacio privada</h4>
+                            </div>
+                            <div class="panel-body">
+                                <p><i>(Nomes visible per usuaris identificats)</i></p>
+                                
+                                <c:if test="${not empty model.version}">
+                                    <p><b>Versio:</b> ${model.version}</p>
+                                </c:if>
+                                
+                                <c:if test="${not empty model.lastUpdateDate}">
+                                    <p><b>Ultima actualitzacio:</b> <fmt:formatDate value="${model.lastUpdateDate}" pattern="dd/MM/yyyy"/></p>
+                                </c:if>
+                                
+                                <c:if test="${not empty model.trainingDate}">
+                                    <p><b>Data entrenament:</b> <fmt:formatDate value="${model.trainingDate}" pattern="dd/MM/yyyy"/></p>
+                                </c:if>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <p><i>Inicia sessio per veure informacio addicional del model.</i></p>
+                                <a href="${pageContext.request.contextPath}/Web/login" class="btn btn-primary">Identificar-se</a>
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <hr>
+        <div class="row">
+            <div class="col-xs-12">
+                <p>AI Models Catalog - Homework 2 SOB</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="${pageContext.request.contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>
